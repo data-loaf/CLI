@@ -81,7 +81,7 @@ resource "aws_lambda_permission" "allow_api" {
 
 // Firehose
 resource "aws_kinesis_firehose_delivery_stream" "events_firehose" {
-  name        = "terraform-kinesis-firehose-extended-s3-test-stream"
+  name        = "events-firehose-delivery-stream"
   destination = "extended_s3"
 
   extended_s3_configuration {
