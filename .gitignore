@@ -3,3 +3,6 @@
 *.tfstate.backup
 *.tfplan
 .terraform/
+
+.DS_Store
+lib/.DS_Store
