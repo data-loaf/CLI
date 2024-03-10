@@ -201,7 +201,7 @@ data "aws_availability_zones" "available" {}
 
 # Create the VPC
 resource "aws_vpc" "redshift-serverless-vpc" {
-  cidr_block           = "10.0.0.0/16"
+  cidr_block = "10.0.0.0/16"
 }
 
 # Create the Redshift Subnet AZ1
@@ -216,7 +216,7 @@ resource "aws_subnet" "redshift-serverless-subnet-az2" {
   vpc_id            = aws_vpc.redshift-serverless-vpc.id
   cidr_block        = "10.0.0.2/16"
   availability_zone = data.aws_availability_zones.available.names[1]
-  
+
 }
 
 # Create the Redshift Subnet AZ3
@@ -257,7 +257,7 @@ resource "aws_security_group" "redshift-serverless-security-group" {
   description = "description- dataloaf-redshift-serverless-security-group"
 
   vpc_id = aws_vpc.redshift-serverless-vpc.id
-  
+
   ingress {
     description = "Redshift port"
     from_port   = 5439
