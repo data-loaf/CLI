@@ -148,3 +148,5 @@ resource "aws_secretsmanager_secret_version" "redshift_connection" {
     dbClusterIdentifier = aws_redshift_cluster.redshift_cluster.cluster_identifier
   })
 }
+
+// REDSHIFT FULL ACCESS
