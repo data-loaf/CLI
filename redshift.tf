@@ -78,7 +78,7 @@ resource "aws_default_security_group" "redshift_security_group" {
     from_port   = 5439
     to_port     = 5439
     protocol    = "tcp"
-    cidr_blocks = ["52.70.63.192/27"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
@@ -133,7 +133,7 @@ resource "aws_redshift_cluster" "redshift_cluster" {
 
 resource "aws_secretsmanager_secret" "redshift_connection" {
   description = "Redshift connect details"
-  name        = "redshift_secret_${random_string.unique_suffix.result}"
+  name        = "redshift_secret_loaf_${random_string.unique_suffix.result}"
 }
 
 // Use secrets manager to handle connection
