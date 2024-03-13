@@ -41,18 +41,6 @@ data "aws_iam_policy_document" "firehose_assume_role_policy" {
     }
 
     actions = ["sts:AssumeRole"]
-
-  }
-
-  statement {
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["redshift.amazonaws.com"]
-    }
-
-    actions = ["sts:AssumeRole"]
   }
 }
 
@@ -64,7 +52,6 @@ resource "aws_iam_policy" "firehose_managed_policy" {
     Statement = [
       {
         Action = [
-          "redshift:*",
           "s3:AbortMultipartUpload",
           "s3:GetBucketLocation",
           "s3:GetObject",
