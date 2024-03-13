@@ -1,3 +1,4 @@
+
 resource "aws_kinesis_firehose_delivery_stream" "events_firehose" {
   name        = "events-firehose-delivery-stream"
   destination = "redshift"
@@ -7,8 +8,8 @@ resource "aws_kinesis_firehose_delivery_stream" "events_firehose" {
     cluster_jdbcurl = "jdbc:redshift://${aws_redshift_cluster.redshift_cluster.endpoint}/${aws_redshift_cluster.redshift_cluster.database_name}"
     username        = aws_redshift_cluster.redshift_cluster.master_username
     password        = aws_redshift_cluster.redshift_cluster.master_password
-    data_table_name = "data"
-    copy_options    = "json 's3://${aws_s3_bucket.events_bucket.bucket}/' region '${data.aws_region.current.name}' timeformat 'auto'"
+    data_table_name = "events"
+    copy_options    = "FORMAT AS JSON 'auto' GZIP" # Added options to decompress then convert to JSON
 
     s3_configuration {
       role_arn           = aws_iam_role.firehose_role.arn
@@ -42,6 +43,17 @@ data "aws_iam_policy_document" "firehose_assume_role_policy" {
     actions = ["sts:AssumeRole"]
 
   }
+
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["redshift.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
 }
 
 resource "aws_iam_policy" "firehose_managed_policy" {
@@ -51,7 +63,9 @@ resource "aws_iam_policy" "firehose_managed_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Action = ["s3:AbortMultipartUpload",
+        Action = [
+          "redshift:*",
+          "s3:AbortMultipartUpload",
           "s3:GetBucketLocation",
           "s3:GetObject",
           "s3:ListBucket",
