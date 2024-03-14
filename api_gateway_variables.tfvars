@@ -1,7 +1,7 @@
 // API Gateway Resource Variables
 
 // API Gateway
-api_gateway_name     = "api_gateway"
+api_gateway_name     = "loaf_api_gateway"
 api_gateway_protocol = "HTTP"
 
 // API Gateway Route
