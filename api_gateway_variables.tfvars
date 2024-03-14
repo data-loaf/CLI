@@ -1,11 +1,12 @@
 // API Gateway Resource Variables
 
 // API Gateway
-api_gateway_name     = "event_gateway"
+api_gateway_name     = "api_gateway"
 api_gateway_protocol = "HTTP"
 
 // API Gateway Route
 api_gateway_events_route_key = "POST /events"
+api_gateway_users_route_key  = "POST /users"
 
 // API Gateway Integration
 api_gateway_integration_type        = "AWS_PROXY"
