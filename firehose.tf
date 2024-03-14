@@ -1,19 +1,38 @@
+# Our firehose streams and attributes
+locals {
+  delivery_streams = {
+    events = {
+      name        = "events-firehose-delivery-stream"
+      destination = "redshift"
+      table_name  = "events"
+      bucket_arn  = aws_s3_bucket.events_bucket.arn
+    },
+    users = {
+      name        = "users-firehose-delivery-stream"
+      destination = "redshift"
+      table_name  = "users"
+      bucket_arn  = aws_s3_bucket.users_bucket.arn
+    }
+  }
+}
 
-resource "aws_kinesis_firehose_delivery_stream" "events_firehose" {
-  name        = "events-firehose-delivery-stream"
-  destination = "redshift"
+resource "aws_kinesis_firehose_delivery_stream" "firehose" {
+  for_each = local.delivery_streams
+
+  name        = each.value.name
+  destination = each.value.destination
 
   redshift_configuration {
     role_arn        = aws_iam_role.firehose_role.arn
     cluster_jdbcurl = "jdbc:redshift://${aws_redshift_cluster.redshift_cluster.endpoint}/${aws_redshift_cluster.redshift_cluster.database_name}"
     username        = aws_redshift_cluster.redshift_cluster.master_username
     password        = aws_redshift_cluster.redshift_cluster.master_password
-    data_table_name = "events"
-    copy_options    = "FORMAT AS JSON 'auto' GZIP" # Added options to decompress then convert to JSON
+    data_table_name = each.value.table_name
+    copy_options    = "FORMAT AS JSON 'auto' GZIP"
 
     s3_configuration {
       role_arn           = aws_iam_role.firehose_role.arn
-      bucket_arn         = aws_s3_bucket.events_bucket.arn
+      bucket_arn         = each.value.bucket_arn
       buffering_size     = 10
       buffering_interval = 400
       compression_format = "GZIP"
@@ -21,7 +40,7 @@ resource "aws_kinesis_firehose_delivery_stream" "events_firehose" {
 
     s3_backup_configuration {
       role_arn           = aws_iam_role.firehose_role.arn
-      bucket_arn         = aws_s3_bucket.events_bucket.arn
+      bucket_arn         = each.value.bucket_arn
       buffering_size     = 15
       buffering_interval = 300
       compression_format = "GZIP"
