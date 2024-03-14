@@ -36,7 +36,7 @@ resource "aws_redshift_subnet_group" "dataloaf-redshift-subnet-group" {
     aws_subnet.dataloaf-redshift-subnet-az2,
   ]
 
-  name       = "dataloaf-dataloaf-redshift-subnet-group"
+  name       = "dataloaf-redshift-subnet-group"
   subnet_ids = [aws_subnet.dataloaf-redshift-subnet-az1.id, aws_subnet.dataloaf-redshift-subnet-az2.id]
 }
 
