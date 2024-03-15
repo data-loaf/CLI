@@ -1,16 +1,29 @@
-resource "aws_apigatewayv2_api" "event_gateway" {
+locals {
+  routes = {
+    events = {
+      route_key = var.api_gateway_events_route_key
+    },
+    users = {
+      route_key = var.api_gateway_users_route_key
+    }
+  }
+}
+
+resource "aws_apigatewayv2_api" "api_gateway" {
   name          = var.api_gateway_name
   protocol_type = var.api_gateway_protocol
 }
 
-resource "aws_apigatewayv2_route" "events_route" {
-  api_id    = aws_apigatewayv2_api.event_gateway.id
-  route_key = var.api_gateway_events_route_key
+resource "aws_apigatewayv2_route" "routes" {
+  for_each = local.routes
+
+  api_id    = aws_apigatewayv2_api.api_gateway.id
+  route_key = each.value.route_key
   target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
 }
 
 resource "aws_apigatewayv2_integration" "lambda_integration" {
-  api_id           = aws_apigatewayv2_api.event_gateway.id
+  api_id           = aws_apigatewayv2_api.api_gateway.id
   integration_type = var.api_gateway_integration_type
 
   connection_type      = var.api_gateway_connection_type
@@ -21,7 +34,7 @@ resource "aws_apigatewayv2_integration" "lambda_integration" {
 }
 
 resource "aws_apigatewayv2_stage" "api_stage" {
-  api_id = aws_apigatewayv2_api.event_gateway.id
+  api_id = aws_apigatewayv2_api.api_gateway.id
   name   = var.api_gateway_stage_name
 
   auto_deploy = true

@@ -62,3 +62,7 @@ variable "api_gateway_passthrough_behavior" {
   description = "api gateway to lambda passthrough behavior"
 }
 
+variable "api_gateway_users_route_key" {
+  type        = string
+  description = "route key for users route in api gateway"
+}
