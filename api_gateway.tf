@@ -29,7 +29,7 @@ resource "aws_apigatewayv2_integration" "lambda_integration" {
   connection_type      = var.api_gateway_connection_type
   description          = var.api_gateway_integration_description
   integration_method   = var.api_gateway_integration_method
-  integration_uri      = aws_lambda_function.events_lambda.invoke_arn
+  integration_uri      = aws_lambda_function.stream_router_lambda.invoke_arn
   passthrough_behavior = var.api_gateway_passthrough_behavior
 }
 

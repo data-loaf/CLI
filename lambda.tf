@@ -1,7 +1,7 @@
 # Example Lambda Function
-resource "aws_lambda_function" "events_lambda" {
-  filename      = "events.zip"
-  function_name = "events"
+resource "aws_lambda_function" "stream_router_lambda" {
+  filename      = "stream_router_lambda.zip"
+  function_name = "stream_router"
   role          = aws_iam_role.lambda_iam_role.arn
   handler       = "index.handler"
   runtime       = "nodejs20.x"
@@ -41,7 +41,7 @@ resource "aws_iam_role" "lambda_iam_role" {
 resource "aws_lambda_permission" "allow_api" {
   statement_id_prefix = "ExecuteByAPI"
   action              = "lambda:InvokeFunction"
-  function_name       = aws_lambda_function.events_lambda.function_name
+  function_name       = aws_lambda_function.stream_router_lambda.function_name
   principal           = "apigateway.amazonaws.com"
   source_arn          = "${aws_apigatewayv2_api.api_gateway.execution_arn}/*/*/events"
 }
