@@ -34,10 +34,10 @@ resource "aws_key_pair" "key_pair" {
 // Save PEM file locally
 resource "local_file" "private_key" {
   content  = tls_private_key.rsa_4096.private_key_pem
-  filename = var.key_name
+  filename = "${var.key_name}.pem"
 
   provisioner "local-exec" {
-    command = "chmod 400 ${var.key_name}"
+    command = "chmod 400 ${var.key_name}.pem"
   }
 }
 
@@ -84,13 +84,21 @@ resource "null_resource" "remote" {
   connection {
     type        = "ssh"
     user        = "ubuntu"
-    private_key = file("~/.ssh/")
+    private_key = file("${var.key_name}.pem")
     host        = aws_instance.loaf_application.public_ip
   }
   provisioner "remote-exec" {
     inline = [
       "sudo apt update",
       "sudo apt install -y nodejs npm",
+      "sudo apt-get update",
+      "sudo apt-get install ca-certificates curl",
+      "sudo install -m 0755 -d /etc/apt/keyrings",
+      "sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc",
+      "sudo chmod a+r /etc/apt/keyrings/docker.asc",
+      "echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo \"$VERSION_CODENAME\") stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
+      "sudo apt-get update",
+      "sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin",
       "git clone https://github.com/CodeSagarOfficial/nodejs-demo.git",
       "cd nodejs-demo",
       "sudo npm install -g pm2",
