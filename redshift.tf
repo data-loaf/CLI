@@ -121,9 +121,9 @@ resource "aws_iam_role_policy" "s3_access_policy" {
 // Spin up cluster
 resource "aws_redshift_cluster" "redshift_cluster" {
   cluster_identifier        = "loaf-cluster"
-  database_name             = "loaf_db"
-  master_username           = "loafadmin"
-  master_password           = "Loafpassword1"
+  database_name             = var.redshift_db_name
+  master_username           = var.redshift_username
+  master_password           = var.redshift_password
   node_type                 = "dc2.large"
   cluster_type              = "single-node"
   cluster_subnet_group_name = aws_redshift_subnet_group.dataloaf-redshift-subnet-group.name
@@ -133,6 +133,7 @@ resource "aws_redshift_cluster" "redshift_cluster" {
   provisioner "local-exec" {
     command = "psql \"postgresql://${self.master_username}:${self.master_password}@${self.endpoint}/${self.database_name}\" -f ./redshift_table.sql"
   }
+
   skip_final_snapshot = true
 }
 
@@ -153,5 +154,3 @@ resource "aws_secretsmanager_secret_version" "redshift_connection" {
     dbClusterIdentifier = aws_redshift_cluster.redshift_cluster.cluster_identifier
   })
 }
-
-// REDSHIFT FULL ACCESS
