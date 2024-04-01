@@ -35,7 +35,12 @@ variable "api_gateway_stage_name" {
 
 variable "api_gateway_events_route_key" {
   type        = string
-  description = "api route key"
+  description = "api route key for event streaming"
+}
+
+variable "api_gateway_users_update_route_key" {
+  type        = string
+  description = "api route key for user updates"
 }
 
 variable "api_gateway_integration_type" {
@@ -54,7 +59,7 @@ variable "api_gateway_integration_description" {
 
 variable "api_gateway_integration_method" {
   type        = string
-  description = "api gateway to lambda integration method"
+  description = "api gateway to router lambda integration method"
 }
 
 variable "api_gateway_passthrough_behavior" {
@@ -65,4 +70,24 @@ variable "api_gateway_passthrough_behavior" {
 variable "api_gateway_users_route_key" {
   type        = string
   description = "route key for users route in api gateway"
+}
+
+// Redshift variables
+
+variable "redshift_db_name" {
+  type        = string
+  description = "Redshift Database Name"
+  sensitive   = true
+}
+
+variable "redshift_username" {
+  type        = string
+  description = "Redshift Username"
+  sensitive   = true
+}
+
+variable "redshift_password" {
+  type        = string
+  description = "Redshift Password"
+  sensitive   = true
 }
