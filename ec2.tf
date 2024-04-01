@@ -1,50 +1,14 @@
-/*
-Things to execute on provision
-1. install node
-2. install postgres
-2a. figure out when to create tables
-3. clone repo
-4. start app server
-
-ssh into ec2?
-
-things to do:
-
-how do we determine the region needed for the AMI
-where do we want to store the pem key
-
-*/
-
-// To Generate Private Key
-resource "tls_private_key" "rsa_4096" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-variable "key_name" {
-  description = "Name of the SSH key pair"
-}
-
-// Create Key Pair for Connecting EC2 via SSH
-resource "aws_key_pair" "key_pair" {
-  key_name   = var.key_name
-  public_key = tls_private_key.rsa_4096.public_key_openssh
-}
-
-// Save PEM file locally
-resource "local_file" "private_key" {
-  content  = tls_private_key.rsa_4096.private_key_pem
-  filename = "${var.key_name}.pem"
-
-  provisioner "local-exec" {
-    command = "chmod 400 ${var.key_name}.pem"
-  }
-}
-
 # Create a security group
 resource "aws_security_group" "loaf_sg_ec2" {
   name        = "loaf_sg_ec2"
   description = "Security group for EC2"
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
   ingress {
     from_port   = 22
@@ -54,8 +18,8 @@ resource "aws_security_group" "loaf_sg_ec2" {
   }
 
   ingress {
-    from_port   = 3000
-    to_port     = 3000
+    from_port   = 80
+    to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -69,45 +33,77 @@ resource "aws_security_group" "loaf_sg_ec2" {
 }
 
 
-resource "aws_instance" "loaf_application" {
+resource "aws_instance" "loaf_app" {
   ami                    = "ami-0f8b8f874036055b1"
   instance_type          = "t2.micro"
-  key_name               = aws_key_pair.key_pair.key_name
   vpc_security_group_ids = [aws_security_group.loaf_sg_ec2.id]
+
+  user_data = <<-EOF
+    #!/bin/bash
+
+    # This is a sample shell script
+    cd ./home/ubuntu
+    sudo apt update
+    sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+    sudo apt update
+    sudo apt install -y docker-ce
+    git clone https://github.com/Capstone2401/backend-app.git
+    sudo systemctl start docker
+    cd backend-app
+    echo "REDSHIFT_CONN_STRING=postgresql://${aws_redshift_cluster.redshift_cluster.master_username}:${aws_redshift_cluster.redshift_cluster.master_password}@${aws_redshift_cluster.redshift_cluster.endpoint}/${aws_redshift_cluster.redshift_cluster.database_name}" > .env
+    sudo docker build -t backend-app:loaf .
+    sudo apt install docker-compose
+    sudo docker compose --env-file .env up -d
+
+  EOF
 
   tags = {
     Name = "loaf_application"
   }
 }
 
-resource "null_resource" "remote" {
-  connection {
-    type        = "ssh"
-    user        = "ubuntu"
-    private_key = file("${var.key_name}.pem")
-    host        = aws_instance.loaf_application.public_ip
-  }
-  provisioner "remote-exec" {
-    inline = [
-      "sudo apt update",
-      "sudo apt install -y nodejs npm",
-      "sudo apt-get update",
-      "sudo apt-get install ca-certificates curl",
-      "sudo install -m 0755 -d /etc/apt/keyrings",
-      "sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc",
-      "sudo chmod a+r /etc/apt/keyrings/docker.asc",
-      "echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo \"$VERSION_CODENAME\") stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
-      "sudo apt-get update",
-      "sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin",
-      "git clone https://github.com/CodeSagarOfficial/nodejs-demo.git",
-      "cd nodejs-demo",
-      "sudo npm install -g pm2",
-      "npm install",
-      "pm2 start app.js"
+/* resource "aws_acm_certificate" "cert" {
+  domain_name       = aws_instance.loaf_dev.public_dns
+  validation_method = "DNS"
 
-    ]
+  tags = {
+    Environment = "prod"
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
+data "aws_route53_zone" "loaf_app_zone" {
+  name         = aws_instance.loaf_dev.public_dns
+  private_zone = false
+}
 
+resource "aws_route53_record" "loaf_app_record" {
+  for_each = {
+    for dvo in aws_acm_certificate.cert.domain_validation_options : dvo.domain_name => {
+      name   = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type   = dvo.resource_record_type
+    }
+  }
 
+  allow_overwrite = true
+  name            = each.value.name
+  records         = [each.value.record]
+  ttl             = 60
+  type            = each.value.type
+  zone_id         = data.aws_route53_zone.loaf_app_zone.zone_id
+}
+
+resource "aws_acm_certificate_validation" "cert_validation" {
+  certificate_arn         = aws_acm_certificate.cert.arn
+  validation_record_fqdns = [for record in aws_route53_record.loaf_app_record : record.fqdn]
+}
+*/
+output "ec2_url" {
+  value = aws_instance.loaf_app.public_dns
+} 
