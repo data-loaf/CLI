@@ -130,10 +130,6 @@ resource "aws_redshift_cluster" "redshift_cluster" {
   vpc_security_group_ids    = ["${aws_default_security_group.redshift_security_group.id}"]
   publicly_accessible       = true
   iam_roles                 = [aws_iam_role.redshift_iam_role.arn]
-  provisioner "local-exec" {
-    command = "psql \"postgresql://${self.master_username}:${self.master_password}@${self.endpoint}/${self.database_name}\" -f ./redshift_table.sql"
-  }
-
   skip_final_snapshot = true
 }
 
