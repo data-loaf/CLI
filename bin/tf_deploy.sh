@@ -10,4 +10,4 @@ terraform validate
 
 # Run terraform apply to provision resources from Terraform configuration files
 echo "Provisioning Terraform resources..."
-terraform apply -var-file=api_gateway_variables.tfvars -var-file=provider_variables.tfvars -auto-approve
+terraform apply -var-file=./values/api_gateway.tfvars -var-file=./values/provider.tfvars -var-file=./values/redshift.tfvars -auto-approve

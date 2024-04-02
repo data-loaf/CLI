@@ -1,4 +1,3 @@
-# Create a security group
 resource "aws_security_group" "loaf_sg_ec2" {
   name        = "loaf_sg_ec2"
   description = "Security group for EC2"

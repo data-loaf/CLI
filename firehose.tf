@@ -1,4 +1,3 @@
-# Our firehose streams and attributes
 locals {
   delivery_streams = {
     events = {
@@ -15,6 +14,9 @@ locals {
     }
   }
 }
+
+resource "aws_s3_bucket" "events_bucket" {}
+resource "aws_s3_bucket" "users_bucket" {}
 
 resource "aws_kinesis_firehose_delivery_stream" "firehose" {
   for_each = local.delivery_streams

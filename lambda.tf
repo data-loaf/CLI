@@ -1,4 +1,4 @@
-# Example Lambda Function
+# Data Generation Lambda Function
 resource "aws_lambda_function" "stream_router_lambda" {
   filename      = "./lib/stream_router_lambda.zip"
   function_name = "stream_router"
@@ -7,7 +7,7 @@ resource "aws_lambda_function" "stream_router_lambda" {
   runtime       = "nodejs20.x"
 }
 
-# Example Lambda Function
+# Data Update Lambda Function
 resource "aws_lambda_function" "update_user_lambda" {
 
   filename      = "./lib/lambda_user_update.zip"
@@ -38,7 +38,7 @@ resource "aws_iam_policy" "lambda_managed_policy" {
   })
 }
 
-# Example IAM Role for Lambda
+# IAM Role for Lambda
 resource "aws_iam_role" "lambda_iam_role" {
   name = "lambda_iam_role"
   assume_role_policy = jsonencode({
