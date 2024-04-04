@@ -1,6 +1,6 @@
 resource "aws_elb" "bar" {
   name               = "foobar-terraform-elb"
-  availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
+  availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c", "us-east-1d"]
 
   listener {
     instance_port     = 80
