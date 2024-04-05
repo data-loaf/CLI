@@ -11,6 +11,8 @@ import (
 )
 
 var (
+	titleText           = "DataLoaf 🍞"
+	docStyle            = lipgloss.NewStyle().Margin(1, 2)
 	focusedStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 	blurredStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
 	cursorStyle         = focusedStyle.Copy()
@@ -20,6 +22,9 @@ var (
 
 	focusedButton = focusedStyle.Copy().Render("[ Continue ]")
 	blurredButton = fmt.Sprintf("[ %s ]", blurredStyle.Render("Continue"))
+	titleStyle    = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#F1D492")).
+			Bold(true)
 )
 
 type TextInputFields map[string]string
@@ -29,6 +34,7 @@ type Model struct {
 	inputs      []textinput.Model
 	cursorMode  cursor.Mode
 	InputValues TextInputFields
+	Exited      bool
 }
 
 func (m *Model) setInputValues() {
@@ -93,6 +99,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "esc":
+			m.Exited = true
 			return m, tea.Quit
 
 		// Change cursor mode
@@ -168,12 +175,13 @@ func (m *Model) updateInputs(msg tea.Msg) tea.Cmd {
 }
 
 func (m *Model) View() string {
-	var b strings.Builder
+	title := titleStyle.Render(titleText)
+	var cursorMode strings.Builder
 
 	for i := range m.inputs {
-		b.WriteString(m.inputs[i].View())
+		cursorMode.WriteString(m.inputs[i].View())
 		if i < len(m.inputs)-1 {
-			b.WriteRune('\n')
+			cursorMode.WriteRune('\n')
 		}
 	}
 
@@ -181,11 +189,11 @@ func (m *Model) View() string {
 	if m.focusIndex == len(m.inputs) {
 		button = &focusedButton
 	}
-	fmt.Fprintf(&b, "\n\n%s\n\n", *button)
+	fmt.Fprintf(&cursorMode, "\n\n%s\n\n", *button)
 
-	b.WriteString(helpStyle.Render("cursor mode is "))
-	b.WriteString(cursorModeHelpStyle.Render(m.cursorMode.String()))
-	b.WriteString(helpStyle.Render(" (ctrl+r to change style)"))
+	cursorMode.WriteString(helpStyle.Render("cursor mode is "))
+	cursorMode.WriteString(cursorModeHelpStyle.Render(m.cursorMode.String()))
+	cursorMode.WriteString(helpStyle.Render(" (ctrl+r to change style)"))
 
-	return b.String()
+	return docStyle.Render(title + "\n\n" + cursorMode.String())
 }

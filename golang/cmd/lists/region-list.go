@@ -5,8 +5,8 @@ import (
 )
 
 var Regions = []list.Item{
-	item{title: "us-east-2", desc: "US East (Ohio)"},
 	item{title: "us-east-1", desc: "US East (N. Virginia)"},
+	item{title: "us-east-2", desc: "US East (Ohio)"},
 	item{title: "us-west-1", desc: "US West (N. California)"},
 	item{title: "us-west-2", desc: "US West (Oregon)"},
 	item{title: "af-south-1", desc: "Africa (Cape Town)"},

@@ -38,6 +38,10 @@ func executeInputForm(flags inputs.TextInputFields) inputs.TextInputFields {
 		}
 	}
 
+	if modelTextInputs.Exited == true {
+		os.Exit(0)
+	}
+
 	resultInputs := modelTextInputs.GetInputValues()
 	return mergeFlagsAndInputs(flags, resultInputs)
 }
@@ -45,6 +49,7 @@ func executeInputForm(flags inputs.TextInputFields) inputs.TextInputFields {
 func executeListSelection() string {
 	items := lists.Regions
 	list := list.New(items, list.NewDefaultDelegate(), 0, 0)
+	list.Title = "AWS Regions"
 
 	regionModel := &lists.Model{List: list}
 	p := tea.NewProgram(regionModel, tea.WithAltScreen())

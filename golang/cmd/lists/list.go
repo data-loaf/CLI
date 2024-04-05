@@ -6,7 +6,13 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-var docStyle = lipgloss.NewStyle().Margin(1, 2)
+var (
+	titleText  = "DataLoaf 🍞"
+	docStyle   = lipgloss.NewStyle().Margin(1, 2)
+	titleStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#F1D492")).
+			Bold(true)
+)
 
 type item struct {
 	title, desc string
@@ -63,5 +69,6 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) View() string {
-	return docStyle.Render(m.List.View())
+	title := titleStyle.Render(titleText)
+	return docStyle.Render(title, m.List.View())
 }
