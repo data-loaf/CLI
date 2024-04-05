@@ -2,8 +2,11 @@ package cmd
 
 import (
 	inputs "dataloaf/cmd/inputs"
+	lists "dataloaf/cmd/lists"
 	"fmt"
 	"os"
+
+	list "github.com/charmbracelet/bubbles/list"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
@@ -26,26 +29,51 @@ func mergeFlagsAndInputs(
 	return mergedInputs
 }
 
-func executeDeploy(cmd *cobra.Command, args []string) {
-	accessKey, _ := cmd.Flags().GetString("access")
-	secretKey, _ := cmd.Flags().GetString("secret")
-	// region, _ := cmd.Flags().GetString("region")
+func executeInputForm(flags inputs.TextInputFields) inputs.TextInputFields {
+	modelTextInputs := inputs.InitialModel(flags)
 
-	flags := inputs.TextInputFields{"AccessKey": accessKey, "SecretKey": secretKey}
-	fmt.Println(flags)
-	model := inputs.InitialModel(flags)
-
-	if accessKey == "" || secretKey == "" {
-		if _, err := tea.NewProgram(model).Run(); err != nil {
+	if flags["AccessKey"] == "" || flags["SecretKey"] == "" {
+		if _, err := tea.NewProgram(modelTextInputs, tea.WithAltScreen()).Run(); err != nil {
 			fmt.Printf("could not start program: %s\n", err)
-			os.Exit(1)
 		}
 	}
 
-	resultInputs := inputs.TextResults
-	mergedResult := mergeFlagsAndInputs(flags, resultInputs)
+	resultInputs := modelTextInputs.GetInputValues()
+	return mergeFlagsAndInputs(flags, resultInputs)
+}
 
-	fmt.Println(mergedResult)
+func executeListSelection() string {
+	items := lists.Regions
+	list := list.New(items, list.NewDefaultDelegate(), 0, 0)
+
+	regionModel := &lists.Model{List: list}
+	p := tea.NewProgram(regionModel, tea.WithAltScreen())
+
+	if _, err := p.Run(); err != nil {
+		fmt.Println("Error running program:", err)
+		os.Exit(1)
+	}
+
+	return regionModel.GetSelection()
+}
+
+func executeDeploy(cmd *cobra.Command, args []string) {
+	accessKey, _ := cmd.Flags().GetString("access")
+	secretKey, _ := cmd.Flags().GetString("secret")
+	region, _ := cmd.Flags().GetString("region")
+
+	flags := inputs.TextInputFields{"AccessKey": accessKey, "SecretKey": secretKey}
+	resultKeyInput := executeInputForm(flags)
+
+	resultRegionInput := ""
+
+	if lists.IsValidChoice(region) {
+		resultRegionInput = region
+	} else {
+		resultRegionInput = executeListSelection()
+	}
+
+	fmt.Printf("Final selections are %v and %s", resultKeyInput, resultRegionInput)
 }
 
 // deployCmd represents the deploy command
