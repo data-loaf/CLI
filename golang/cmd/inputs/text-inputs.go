@@ -22,17 +22,16 @@ var (
 	blurredButton = fmt.Sprintf("[ %s ]", blurredStyle.Render("Continue"))
 )
 
-var TextResults TextInputFields
-
 type TextInputFields map[string]string
 
-type model struct {
-	focusIndex int
-	inputs     []textinput.Model
-	cursorMode cursor.Mode
+type Model struct {
+	focusIndex  int
+	inputs      []textinput.Model
+	cursorMode  cursor.Mode
+	InputValues TextInputFields
 }
 
-func (m model) GetInputValues() TextInputFields {
+func (m *Model) setInputValues() {
 	values := make(TextInputFields, 2)
 
 	for _, input := range m.inputs {
@@ -43,7 +42,12 @@ func (m model) GetInputValues() TextInputFields {
 			values["SecretKey"] = input.Value()
 		}
 	}
-	return values
+
+	m.InputValues = values
+}
+
+func (m *Model) GetInputValues() TextInputFields {
+	return m.InputValues
 }
 
 func createTextInput(placeHolder string, inputs []textinput.Model) textinput.Model {
@@ -61,7 +65,7 @@ func createTextInput(placeHolder string, inputs []textinput.Model) textinput.Mod
 	return keyInput
 }
 
-func InitialModel(flags TextInputFields) model {
+func InitialModel(flags TextInputFields) *Model {
 	var inputs []textinput.Model
 
 	if flags["AccessKey"] == "" {
@@ -74,17 +78,17 @@ func InitialModel(flags TextInputFields) model {
 		inputs = append(inputs, secretKeyInput)
 	}
 
-	return model{
+	return &Model{
 		inputs:     inputs,
 		focusIndex: 0,
 	}
 }
 
-func (m model) Init() tea.Cmd {
+func (m *Model) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -110,8 +114,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Did the user press enter while the submit button was focused?
 			// If so, exit.
 			if s == "enter" && m.focusIndex == len(m.inputs) {
-				inputValues := m.GetInputValues()
-				TextResults = inputValues
+				m.setInputValues()
 				return m, tea.Quit
 			}
 
@@ -152,7 +155,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m *model) updateInputs(msg tea.Msg) tea.Cmd {
+func (m *Model) updateInputs(msg tea.Msg) tea.Cmd {
 	cmds := make([]tea.Cmd, len(m.inputs))
 
 	// Only text inputs with Focus() set will respond, so it's safe to simply
@@ -164,7 +167,7 @@ func (m *model) updateInputs(msg tea.Msg) tea.Cmd {
 	return tea.Batch(cmds...)
 }
 
-func (m model) View() string {
+func (m *Model) View() string {
 	var b strings.Builder
 
 	for i := range m.inputs {
