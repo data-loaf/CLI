@@ -12,13 +12,15 @@ import (
 
 var (
 	titleText           = "DataLoaf 🍞"
+	descText            = "To deploy, we need your AWS credentials"
 	docStyle            = lipgloss.NewStyle().Margin(1, 2)
-	focusedStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
+	focusedStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("#F1D492"))
 	blurredStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
 	cursorStyle         = focusedStyle.Copy()
 	noStyle             = lipgloss.NewStyle()
 	helpStyle           = blurredStyle.Copy()
 	cursorModeHelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
+	descStyle           = lipgloss.NewStyle().MarginTop(1).MarginBottom(1)
 
 	focusedButton = focusedStyle.Copy().Render("[ Continue ]")
 	blurredButton = fmt.Sprintf("[ %s ]", blurredStyle.Render("Continue"))
@@ -176,6 +178,8 @@ func (m *Model) updateInputs(msg tea.Msg) tea.Cmd {
 
 func (m *Model) View() string {
 	title := titleStyle.Render(titleText)
+	desc := descStyle.Render(descText)
+
 	var cursorMode strings.Builder
 
 	for i := range m.inputs {
@@ -195,5 +199,7 @@ func (m *Model) View() string {
 	cursorMode.WriteString(cursorModeHelpStyle.Render(m.cursorMode.String()))
 	cursorMode.WriteString(helpStyle.Render(" (ctrl+r to change style)"))
 
-	return docStyle.Render(title + "\n\n" + cursorMode.String())
+	return docStyle.Render(
+		title + "\n" + desc + "\n" + cursorMode.String(),
+	)
 }

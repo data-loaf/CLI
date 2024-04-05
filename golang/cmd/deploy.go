@@ -7,6 +7,7 @@ import (
 	"os"
 
 	list "github.com/charmbracelet/bubbles/list"
+	"github.com/charmbracelet/lipgloss"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
@@ -48,10 +49,16 @@ func executeInputForm(flags inputs.TextInputFields) inputs.TextInputFields {
 
 func executeListSelection() string {
 	items := lists.Regions
-	list := list.New(items, list.NewDefaultDelegate(), 0, 0)
-	list.Title = "AWS Regions"
+	d := list.NewDefaultDelegate()
+	d.Styles.SelectedTitle = lipgloss.NewStyle().Foreground(lipgloss.Color("#F1D492"))
+	d.Styles.SelectedDesc = lipgloss.NewStyle().Foreground(lipgloss.Color("#D68A2E"))
 
-	regionModel := &lists.Model{List: list}
+	l := list.New(items, d, 0, 0)
+	l.Title = "\nSelect a region"
+	l.Styles.Title = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
+	l.Styles.TitleBar.PaddingTop(1).PaddingBottom(1).PaddingLeft(0)
+
+	regionModel := &lists.Model{List: l}
 	p := tea.NewProgram(regionModel, tea.WithAltScreen())
 
 	if _, err := p.Run(); err != nil {
