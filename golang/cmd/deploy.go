@@ -33,7 +33,7 @@ func mergeFlagsAndInputs(
 func executeInputForm(flags inputs.TextInputFields) inputs.TextInputFields {
 	modelTextInputs := inputs.InitialModel(flags)
 
-	if flags["AccessKey"] == "" || flags["SecretKey"] == "" {
+	if flags["AccessKey"] == "" || flags["SecretKey"] == "" || flags["Domain"] == "" {
 		if _, err := tea.NewProgram(modelTextInputs, tea.WithAltScreen()).Run(); err != nil {
 			fmt.Printf("could not start program: %s\n", err)
 		}
@@ -72,11 +72,16 @@ func executeListSelection() string {
 func executeDeploy(cmd *cobra.Command, args []string) {
 	accessKey, _ := cmd.Flags().GetString("access")
 	secretKey, _ := cmd.Flags().GetString("secret")
+	domain, _ := cmd.Flags().GetString("domain")
 	region, _ := cmd.Flags().GetString("region")
 
-	flags := inputs.TextInputFields{"AccessKey": accessKey, "SecretKey": secretKey}
-	resultKeyInput := executeInputForm(flags)
+	flags := inputs.TextInputFields{
+		"AccessKey": accessKey,
+		"SecretKey": secretKey,
+		"Domain":    domain,
+	}
 
+	resultKeyInput := executeInputForm(flags)
 	resultRegionInput := ""
 
 	if lists.IsValidChoice(region) {

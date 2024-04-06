@@ -48,6 +48,8 @@ func (m *Model) setInputValues() {
 			values["AccessKey"] = input.Value()
 		case "Secret Key":
 			values["SecretKey"] = input.Value()
+		case "Domain":
+			values["Domain"] = input.Value()
 		}
 	}
 
@@ -84,6 +86,11 @@ func InitialModel(flags TextInputFields) *Model {
 	if flags["SecretKey"] == "" {
 		secretKeyInput := createTextInput("Secret Key", inputs)
 		inputs = append(inputs, secretKeyInput)
+	}
+
+	if flags["Domain"] == "" {
+		domainInput := createTextInput("Domain", inputs)
+		inputs = append(inputs, domainInput)
 	}
 
 	return &Model{
