@@ -28,8 +28,8 @@ type Model struct {
 }
 
 type resultData struct {
-	inputFields   inputs.InputFields
-	listSelection string
+	InputFields   inputs.InputFields
+	ListSelection string
 }
 
 var result resultData

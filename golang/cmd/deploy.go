@@ -14,20 +14,31 @@ import (
 )
 
 func mergeFlagsAndInputs(
-	flags inputs.InputFields,
-	inputs inputs.InputFields,
+	inputFlags inputs.InputFields,
+	inputResults inputs.InputFields,
 ) inputs.InputFields {
 	mergedInputs := make(map[string]string)
 
-	for key, value := range flags {
+	for key, value := range inputFlags {
 		mergedInputs[key] = value
 	}
 
-	for key, value := range inputs {
+	for key, value := range inputResults {
 		mergedInputs[key] = value
 	}
 
 	return mergedInputs
+}
+
+func mergeFlagsAndListSelection(
+	region string,
+	selection string,
+) string {
+	if region != "" {
+		return region
+	} else {
+		return selection
+	}
 }
 
 func initInputsModel(flags inputs.InputFields) tea.Model {
@@ -50,31 +61,37 @@ func initListModel() tea.Model {
 	return regionModel
 }
 
+func runBubbleTea() {
+}
+
 func executeDeploy(cmd *cobra.Command, args []string) {
 	accessKey, _ := cmd.Flags().GetString("access")
 	secretKey, _ := cmd.Flags().GetString("secret")
 	domain, _ := cmd.Flags().GetString("domain")
 	region, _ := cmd.Flags().GetString("region")
 
-	flags := inputs.InputFields{
+	inputFlags := inputs.InputFields{
 		"AccessKey": accessKey,
 		"SecretKey": secretKey,
 		"Domain":    domain,
 	}
 
-	inputsModel := initInputsModel(flags)
+	var listFlag lists.Selection = region
+
+	inputsModel := initInputsModel(inputFlags)
 	listModel := initListModel()
 	appModel := app.Model{InputsModel: inputsModel, ListModel: listModel}
 
-	viewsRequired := new(app.ViewsRequired)
+	viewsRequired := *new(app.ViewsRequired)
 	currentView := appModel.SessionView
 
-	if flags["AccessKey"] == "" || flags["SecretKey"] == "" || flags["Domain"] == "" {
+	if inputFlags["AccessKey"] == "" || inputFlags["SecretKey"] == "" ||
+		inputFlags["Domain"] == "" {
 		currentView = app.InputsView
 		viewsRequired.InputFields = true
 	}
 
-	if !lists.IsValidChoice(region) {
+	if !lists.IsValidChoice(listFlag) {
 		if currentView != app.InputsView {
 			currentView = app.ListView
 		}
@@ -83,7 +100,7 @@ func executeDeploy(cmd *cobra.Command, args []string) {
 		viewsRequired.ListSelection = false
 	}
 
-	appModel.ViewsRequired = *viewsRequired
+	appModel.ViewsRequired = viewsRequired
 	appModel.SessionView = currentView
 
 	if appModel.SessionView != 0 {
@@ -92,9 +109,10 @@ func executeDeploy(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	// TODO: Merge flags with bubble tea outputs
 	resultData := app.GetData()
-	fmt.Println(resultData)
+	mergedInputs := mergeFlagsAndInputs(inputFlags, resultData.InputFields)
+	mergedList := mergeFlagsAndListSelection(listFlag, resultData.ListSelection)
+	fmt.Println(mergedInputs, mergedList)
 }
 
 // deployCmd represents the deploy command

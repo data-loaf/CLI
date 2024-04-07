@@ -16,6 +16,8 @@ var (
 			Bold(true)
 )
 
+type Selection = string // alias for specificity
+
 type item struct {
 	title, desc string
 }
@@ -26,15 +28,15 @@ func (i item) FilterValue() string { return i.title }
 
 type Model struct {
 	List      list.Model
-	Selection string
+	Selection Selection
 	Active    bool
 }
 
-func (m Model) GetSelection() string {
+func (m Model) GetSelection() Selection {
 	return m.Selection
 }
 
-func IsValidChoice(regionInput string) bool {
+func IsValidChoice(regionInput Selection) bool {
 	for _, region := range Regions {
 		if item, ok := region.(item); ok {
 			if regionInput == item.title {
