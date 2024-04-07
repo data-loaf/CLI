@@ -1,7 +1,7 @@
 package lists
 
 import (
-	command "dataloaf/cmd/commands"
+	command "dataloaf/tui/commands"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"

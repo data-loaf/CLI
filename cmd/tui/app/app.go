@@ -1,9 +1,9 @@
 package app
 
 import (
-	command "dataloaf/cmd/commands"
-	inputs "dataloaf/cmd/inputs"
-	"dataloaf/cmd/lists"
+	command "dataloaf/tui/commands"
+	inputs "dataloaf/tui/inputs"
+	lists "dataloaf/tui/lists"
 
 	tea "github.com/charmbracelet/bubbletea"
 )

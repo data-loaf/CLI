@@ -1,9 +1,9 @@
-package cmd
+package commands
 
 import (
-	app "dataloaf/cmd/app"
-	inputs "dataloaf/cmd/inputs"
-	lists "dataloaf/cmd/lists"
+	app "dataloaf/tui/app"
+	inputs "dataloaf/tui/inputs"
+	lists "dataloaf/tui/lists"
 	"fmt"
 
 	list "github.com/charmbracelet/bubbles/list"
@@ -124,7 +124,7 @@ var deployCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(deployCmd)
+	RootCmd.AddCommand(deployCmd)
 	deployCmd.Flags().StringP("access", "a", "", "Your AWS Access Key")
 	deployCmd.Flags().StringP("secret", "s", "", "Your AWS Secret Key")
 	deployCmd.Flags().StringP("region", "r", "", "Your AWS region")

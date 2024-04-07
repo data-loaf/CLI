@@ -1,7 +1,7 @@
 package inputs
 
 import (
-	command "dataloaf/cmd/commands"
+	command "dataloaf/tui/commands"
 	"fmt"
 	"strings"
 
