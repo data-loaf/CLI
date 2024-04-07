@@ -14,9 +14,9 @@ import (
 )
 
 func mergeFlagsAndInputs(
-	flags inputs.TextInputFields,
-	inputs inputs.TextInputFields,
-) inputs.TextInputFields {
+	flags inputs.InputFields,
+	inputs inputs.InputFields,
+) inputs.InputFields {
 	mergedInputs := make(map[string]string)
 
 	for key, value := range flags {
@@ -30,7 +30,7 @@ func mergeFlagsAndInputs(
 	return mergedInputs
 }
 
-func initInputForm(flags inputs.TextInputFields) tea.Model {
+func initInputsModel(flags inputs.InputFields) tea.Model {
 	modelTextInputs := inputs.InitialModel(flags)
 	return modelTextInputs
 }
@@ -56,13 +56,13 @@ func executeDeploy(cmd *cobra.Command, args []string) {
 	domain, _ := cmd.Flags().GetString("domain")
 	region, _ := cmd.Flags().GetString("region")
 
-	flags := inputs.TextInputFields{
+	flags := inputs.InputFields{
 		"AccessKey": accessKey,
 		"SecretKey": secretKey,
 		"Domain":    domain,
 	}
 
-	inputsModel := initInputForm(flags)
+	inputsModel := initInputsModel(flags)
 	listModel := initListModel()
 	appModel := app.Model{InputsModel: inputsModel, ListModel: listModel}
 
@@ -93,6 +93,7 @@ func executeDeploy(cmd *cobra.Command, args []string) {
 		}
 	}
 
+	// TODO: Merge flags with bubble tea outputs
 	resultData := app.GetData()
 	fmt.Println(resultData)
 }

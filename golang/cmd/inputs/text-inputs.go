@@ -33,17 +33,17 @@ var (
 			Bold(true)
 )
 
-type TextInputFields map[string]string
+type InputFields map[string]string
 
 type Model struct {
 	focusIndex  int
 	inputs      []textinput.Model
 	cursorMode  cursor.Mode
-	InputValues TextInputFields
+	InputValues InputFields
 }
 
 func (m Model) setInputValues() Model {
-	values := make(TextInputFields, 3)
+	values := make(InputFields, 3)
 
 	for _, input := range m.inputs {
 		switch input.Placeholder {
@@ -60,7 +60,7 @@ func (m Model) setInputValues() Model {
 	return m
 }
 
-func (m Model) GetInputValues() TextInputFields {
+func (m Model) GetInputValues() InputFields {
 	return m.InputValues
 }
 
@@ -79,7 +79,7 @@ func createTextInput(placeHolder string, inputs []textinput.Model) textinput.Mod
 	return keyInput
 }
 
-func InitialModel(flags TextInputFields) Model {
+func InitialModel(flags InputFields) Model {
 	var inputs []textinput.Model
 
 	if flags["AccessKey"] == "" {

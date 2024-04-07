@@ -16,7 +16,7 @@ type ViewsRequired struct {
 }
 
 type resultData struct {
-	inputFields   inputs.TextInputFields
+	inputFields   inputs.InputFields
 	listSelection string
 }
 
