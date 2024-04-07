@@ -1,6 +1,8 @@
 package lists
 
 import (
+	command "dataloaf/cmd/commands"
+
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -25,9 +27,10 @@ func (i item) FilterValue() string { return i.title }
 type Model struct {
 	List      list.Model
 	Selection string
+	Active    bool
 }
 
-func (m *Model) GetSelection() string {
+func (m Model) GetSelection() string {
 	return m.Selection
 }
 
@@ -43,11 +46,11 @@ func IsValidChoice(regionInput string) bool {
 	return false
 }
 
-func (m *Model) Init() tea.Cmd {
+func (m Model) Init() tea.Cmd {
 	return nil
 }
 
-func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		if msg.String() == "ctrl+c" {
@@ -56,7 +59,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		if msg.String() == "enter" {
 			m.Selection = m.List.SelectedItem().(item).Title()
-			return m, tea.Quit
+			return m, command.CustomQuit
 		}
 	case tea.WindowSizeMsg:
 		h, v := docStyle.GetFrameSize()
@@ -68,7 +71,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m *Model) View() string {
+func (m Model) View() string {
 	title := titleStyle.Render(titleText)
 	return docStyle.Render(title, m.List.View())
 }

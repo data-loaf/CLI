@@ -1,10 +1,10 @@
 package cmd
 
 import (
+	app "dataloaf/cmd/app"
 	inputs "dataloaf/cmd/inputs"
 	lists "dataloaf/cmd/lists"
 	"fmt"
-	"os"
 
 	list "github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/lipgloss"
@@ -30,24 +30,12 @@ func mergeFlagsAndInputs(
 	return mergedInputs
 }
 
-func executeInputForm(flags inputs.TextInputFields) inputs.TextInputFields {
+func initInputForm(flags inputs.TextInputFields) tea.Model {
 	modelTextInputs := inputs.InitialModel(flags)
-
-	if flags["AccessKey"] == "" || flags["SecretKey"] == "" || flags["Domain"] == "" {
-		if _, err := tea.NewProgram(modelTextInputs, tea.WithAltScreen()).Run(); err != nil {
-			fmt.Printf("could not start program: %s\n", err)
-		}
-	}
-
-	if modelTextInputs.Exited == true {
-		os.Exit(0)
-	}
-
-	resultInputs := modelTextInputs.GetInputValues()
-	return mergeFlagsAndInputs(flags, resultInputs)
+	return modelTextInputs
 }
 
-func executeListSelection() string {
+func initListModel() tea.Model {
 	items := lists.Regions
 	d := list.NewDefaultDelegate()
 	d.Styles.SelectedTitle = lipgloss.NewStyle().Foreground(lipgloss.Color("#F1D492"))
@@ -58,15 +46,8 @@ func executeListSelection() string {
 	l.Styles.Title = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
 	l.Styles.TitleBar.PaddingTop(1).PaddingBottom(1).PaddingLeft(0)
 
-	regionModel := &lists.Model{List: l}
-	p := tea.NewProgram(regionModel, tea.WithAltScreen())
-
-	if _, err := p.Run(); err != nil {
-		fmt.Println("Error running program:", err)
-		os.Exit(1)
-	}
-
-	return regionModel.GetSelection()
+	regionModel := lists.Model{List: l}
+	return regionModel
 }
 
 func executeDeploy(cmd *cobra.Command, args []string) {
@@ -81,16 +62,39 @@ func executeDeploy(cmd *cobra.Command, args []string) {
 		"Domain":    domain,
 	}
 
-	resultKeyInput := executeInputForm(flags)
-	resultRegionInput := ""
+	inputsModel := initInputForm(flags)
+	listModel := initListModel()
+	appModel := app.Model{InputsModel: inputsModel, ListModel: listModel}
 
-	if lists.IsValidChoice(region) {
-		resultRegionInput = region
-	} else {
-		resultRegionInput = executeListSelection()
+	viewsRequired := new(app.ViewsRequired)
+	currentView := appModel.SessionView
+
+	if flags["AccessKey"] == "" || flags["SecretKey"] == "" || flags["Domain"] == "" {
+		currentView = app.InputsView
+		viewsRequired.InputFields = true
 	}
 
-	fmt.Printf("Final selections are %v and %s", resultKeyInput, resultRegionInput)
+	if !lists.IsValidChoice(region) {
+		if currentView != app.InputsView {
+			currentView = app.ListView
+		}
+		viewsRequired.ListSelection = true
+	} else {
+		viewsRequired.ListSelection = false
+	}
+
+	appModel.ViewsRequired = *viewsRequired
+	appModel.SessionView = currentView
+	fmt.Println(appModel.ViewsRequired, appModel.SessionView)
+
+	if appModel.SessionView != 0 {
+		if _, err := tea.NewProgram(appModel, tea.WithAltScreen()).Run(); err != nil {
+			fmt.Printf("could not start program: %s\n", err)
+		}
+	}
+
+	resultData := app.GetData()
+	fmt.Println(resultData)
 }
 
 // deployCmd represents the deploy command
@@ -106,4 +110,5 @@ func init() {
 	deployCmd.Flags().StringP("access", "a", "", "Your AWS Access Key")
 	deployCmd.Flags().StringP("secret", "s", "", "Your AWS Secret Key")
 	deployCmd.Flags().StringP("region", "r", "", "Your AWS region")
+	deployCmd.Flags().StringP("domain", "d", "", "Domain you want to use for DataLoaf app")
 }

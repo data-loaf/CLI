@@ -1,6 +1,7 @@
 package inputs
 
 import (
+	command "dataloaf/cmd/commands"
 	"fmt"
 	"strings"
 
@@ -13,7 +14,10 @@ import (
 var (
 	titleText           = "DataLoaf 🍞"
 	descText            = "To deploy, we need your AWS credentials"
-	docStyle            = lipgloss.NewStyle().Margin(1, 2)
+	accessText          = "Access Key"
+	secretText          = "Secret Key"
+	domainText          = "Domain for dataloaf app"
+	docstyle            = lipgloss.NewStyle().Margin(1, 2)
 	focusedStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("#F1D492"))
 	blurredStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
 	cursorStyle         = focusedStyle.Copy()
@@ -36,27 +40,27 @@ type Model struct {
 	inputs      []textinput.Model
 	cursorMode  cursor.Mode
 	InputValues TextInputFields
-	Exited      bool
 }
 
-func (m *Model) setInputValues() {
-	values := make(TextInputFields, 2)
+func (m Model) setInputValues() Model {
+	values := make(TextInputFields, 3)
 
 	for _, input := range m.inputs {
 		switch input.Placeholder {
-		case "Access Key":
+		case accessText:
 			values["AccessKey"] = input.Value()
-		case "Secret Key":
+		case secretText:
 			values["SecretKey"] = input.Value()
-		case "Domain":
+		case domainText:
 			values["Domain"] = input.Value()
 		}
 	}
 
 	m.InputValues = values
+	return m
 }
 
-func (m *Model) GetInputValues() TextInputFields {
+func (m Model) GetInputValues() TextInputFields {
 	return m.InputValues
 }
 
@@ -75,40 +79,39 @@ func createTextInput(placeHolder string, inputs []textinput.Model) textinput.Mod
 	return keyInput
 }
 
-func InitialModel(flags TextInputFields) *Model {
+func InitialModel(flags TextInputFields) Model {
 	var inputs []textinput.Model
 
 	if flags["AccessKey"] == "" {
-		accessKeyInput := createTextInput("Access Key", inputs)
+		accessKeyInput := createTextInput(accessText, inputs)
 		inputs = append(inputs, accessKeyInput)
 	}
 
 	if flags["SecretKey"] == "" {
-		secretKeyInput := createTextInput("Secret Key", inputs)
+		secretKeyInput := createTextInput(secretText, inputs)
 		inputs = append(inputs, secretKeyInput)
 	}
 
 	if flags["Domain"] == "" {
-		domainInput := createTextInput("Domain", inputs)
+		domainInput := createTextInput(domainText, inputs)
 		inputs = append(inputs, domainInput)
 	}
 
-	return &Model{
+	return Model{
 		inputs:     inputs,
 		focusIndex: 0,
 	}
 }
 
-func (m *Model) Init() tea.Cmd {
+func (m Model) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "esc":
-			m.Exited = true
 			return m, tea.Quit
 
 		// Change cursor mode
@@ -130,8 +133,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Did the user press enter while the submit button was focused?
 			// If so, exit.
 			if s == "enter" && m.focusIndex == len(m.inputs) {
-				m.setInputValues()
-				return m, tea.Quit
+				m = m.setInputValues()
+				return m, command.SubmitTextInput
 			}
 
 			// Cycle indexes
@@ -171,7 +174,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m *Model) updateInputs(msg tea.Msg) tea.Cmd {
+func (m Model) updateInputs(msg tea.Msg) tea.Cmd {
 	cmds := make([]tea.Cmd, len(m.inputs))
 
 	// Only text inputs with Focus() set will respond, so it's safe to simply
@@ -183,7 +186,7 @@ func (m *Model) updateInputs(msg tea.Msg) tea.Cmd {
 	return tea.Batch(cmds...)
 }
 
-func (m *Model) View() string {
+func (m Model) View() string {
 	title := titleStyle.Render(titleText)
 	desc := descStyle.Render(descText)
 
@@ -206,7 +209,7 @@ func (m *Model) View() string {
 	cursorMode.WriteString(cursorModeHelpStyle.Render(m.cursorMode.String()))
 	cursorMode.WriteString(helpStyle.Render(" (ctrl+r to change style)"))
 
-	return docStyle.Render(
+	return docstyle.Render(
 		title + "\n" + desc + "\n" + cursorMode.String(),
 	)
 }
