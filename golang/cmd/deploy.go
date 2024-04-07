@@ -85,7 +85,6 @@ func executeDeploy(cmd *cobra.Command, args []string) {
 
 	appModel.ViewsRequired = *viewsRequired
 	appModel.SessionView = currentView
-	fmt.Println(appModel.ViewsRequired, appModel.SessionView)
 
 	if appModel.SessionView != 0 {
 		if _, err := tea.NewProgram(appModel, tea.WithAltScreen()).Run(); err != nil {

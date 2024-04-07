@@ -10,14 +10,14 @@ import (
 
 type sessionView int
 
+const (
+	InputsView sessionView = iota + 1
+	ListView
+)
+
 type ViewsRequired struct {
 	InputFields   bool
 	ListSelection bool
-}
-
-type resultData struct {
-	inputFields   inputs.InputFields
-	listSelection string
 }
 
 type Model struct {
@@ -27,10 +27,10 @@ type Model struct {
 	ViewsRequired ViewsRequired
 }
 
-const (
-	InputsView sessionView = iota + 1
-	ListView
-)
+type resultData struct {
+	inputFields   inputs.InputFields
+	listSelection string
+}
 
 var result resultData
 
