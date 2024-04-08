@@ -1,10 +1,15 @@
 package commands
 
 import (
+	"bufio"
 	app "dataloaf/tui/app"
 	inputs "dataloaf/tui/inputs"
 	lists "dataloaf/tui/lists"
 	"fmt"
+	"io"
+	"os"
+	"os/exec"
+	"path/filepath"
 
 	list "github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/lipgloss"
@@ -12,6 +17,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
 )
+
+var BuildDir string
 
 func mergeFlagsAndInputs(
 	inputFlags inputs.InputFields,
@@ -61,7 +68,48 @@ func initListModel() tea.Model {
 	return regionModel
 }
 
-func runBubbleTea() {
+func printOutput(pipe io.Reader) {
+	scanner := bufio.NewScanner(pipe)
+	for scanner.Scan() {
+		fmt.Println(scanner.Text())
+	}
+}
+
+func runTerraform(mergedInputs inputs.InputFields, mergedList lists.Selection) {
+	var args []string
+
+	for _, val := range mergedInputs {
+		args = append(args, val)
+	}
+
+	exePath, err := os.Executable()
+	if err != nil {
+		fmt.Println("Error", err)
+		return
+	}
+
+	exeDir := filepath.Dir(exePath)
+	args = append(args, mergedList)
+	cmd := exec.Command(
+		"bash",
+		"-c",
+		fmt.Sprintf("%s/../../terraform/bin/tf_deploy.sh", exeDir),
+	)
+
+	stdoutPipe, _ := cmd.StdoutPipe()
+	stderrPipe, _ := cmd.StderrPipe()
+
+	if err := cmd.Start(); err != nil {
+		fmt.Println("Error:", err)
+	}
+
+	go printOutput(stdoutPipe)
+	go printOutput(stderrPipe)
+
+	if err := cmd.Wait(); err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
 }
 
 func executeDeploy(cmd *cobra.Command, args []string) {
@@ -112,11 +160,11 @@ func executeDeploy(cmd *cobra.Command, args []string) {
 	resultData := app.GetData()
 	mergedInputs := mergeFlagsAndInputs(inputFlags, resultData.InputFields)
 	mergedList := mergeFlagsAndListSelection(listFlag, resultData.ListSelection)
-	fmt.Println(mergedInputs, mergedList)
+	runTerraform(mergedInputs, mergedList)
 }
 
-// deployCmd represents the deploy command
-var deployCmd = &cobra.Command{
+// DeployCmd represents the deploy command
+var DeployCmd = &cobra.Command{
 	Use:   "deploy",
 	Short: "Deploy your infrastructure to AWS (powered by terraform)",
 	Long:  ``,
@@ -124,9 +172,8 @@ var deployCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(deployCmd)
-	deployCmd.Flags().StringP("access", "a", "", "Your AWS Access Key")
-	deployCmd.Flags().StringP("secret", "s", "", "Your AWS Secret Key")
-	deployCmd.Flags().StringP("region", "r", "", "Your AWS region")
-	deployCmd.Flags().StringP("domain", "d", "", "Domain you want to use for DataLoaf app")
+	DeployCmd.Flags().StringP("access", "a", "", "Your AWS Access Key")
+	DeployCmd.Flags().StringP("secret", "s", "", "Your AWS Secret Key")
+	DeployCmd.Flags().StringP("region", "r", "", "Your AWS region")
+	DeployCmd.Flags().StringP("domain", "d", "", "Domain you want to use for DataLoaf app")
 }
