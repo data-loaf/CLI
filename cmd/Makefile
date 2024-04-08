@@ -17,6 +17,6 @@ dataloaf-cli:
 	@if ! [ -f "$$HOME/.bashrc" ] && ! [ -f "$$HOME/.zshrc" ]; then \
 	    export PATH="$$PATH:$(pwd)/cli"; \
 	fi
-	@cd ./cli && go build
-	@echo "CLI done building, run 'dataloaf' for available commands"
+	@cd ./cli && go build -o loaf
+	@echo "CLI done building, run 'loaf' for available commands"
 
