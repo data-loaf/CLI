@@ -14,6 +14,7 @@ import (
 var (
 	titleText           = "DataLoaf 🍞"
 	descText            = "To deploy, we need your AWS credentials"
+	errText             = "All fields are required to provision"
 	accessText          = "Access Key"
 	secretText          = "Secret Key"
 	domainText          = "Domain for dataloaf app"
@@ -25,6 +26,10 @@ var (
 	helpStyle           = blurredStyle.Copy()
 	cursorModeHelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
 	descStyle           = lipgloss.NewStyle().MarginTop(1).MarginBottom(1)
+	errStyle            = lipgloss.NewStyle().
+				MarginTop(1).
+				MarginBottom(1).
+				Foreground(lipgloss.Color("204"))
 
 	focusedButton = focusedStyle.Copy().Render("[ Continue ]")
 	blurredButton = fmt.Sprintf("[ %s ]", blurredStyle.Render("Continue"))
@@ -36,16 +41,21 @@ var (
 type InputFields map[string]string
 
 type Model struct {
-	focusIndex  int
-	inputs      []textinput.Model
-	cursorMode  cursor.Mode
-	InputValues InputFields
+	focusIndex    int
+	inputs        []textinput.Model
+	cursorMode    cursor.Mode
+	InputValues   InputFields
+	validationErr bool
 }
 
 func (m Model) setInputValues() Model {
 	values := make(InputFields, 3)
 
 	for _, input := range m.inputs {
+		if input.Value() == "" {
+			m.validationErr = true
+			return m
+		}
 		switch input.Placeholder {
 		case accessText:
 			values["AccessKey"] = input.Value()
@@ -57,6 +67,7 @@ func (m Model) setInputValues() Model {
 	}
 
 	m.InputValues = values
+	m.validationErr = false
 	return m
 }
 
@@ -134,6 +145,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// If so, exit.
 			if s == "enter" && m.focusIndex == len(m.inputs) {
 				m = m.setInputValues()
+
+				if m.validationErr {
+					return m, nil
+				}
+
 				return m, command.SubmitTextInput
 			}
 
@@ -188,7 +204,13 @@ func (m Model) updateInputs(msg tea.Msg) tea.Cmd {
 
 func (m Model) View() string {
 	title := titleStyle.Render(titleText)
-	desc := descStyle.Render(descText)
+	var desc string
+
+	if m.validationErr {
+		desc = errStyle.Render(errText)
+	} else {
+		desc = descStyle.Render(descText)
+	}
 
 	var cursorMode strings.Builder
 

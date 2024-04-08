@@ -10,6 +10,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
+	"strings"
 
 	list "github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/lipgloss"
@@ -18,7 +20,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var BuildDir string
+var terraformExe string = "/../../terraform/bin/tf_deploy.sh"
 
 func mergeFlagsAndInputs(
 	inputFlags inputs.InputFields,
@@ -79,7 +81,13 @@ func runTerraform(mergedInputs inputs.InputFields, mergedList lists.Selection) {
 	var args []string
 
 	for _, val := range mergedInputs {
-		args = append(args, val)
+		args = append(args, strings.TrimSpace(val))
+	}
+
+	args = append(args, mergedList)
+
+	if slices.Contains(args, "") {
+		return
 	}
 
 	exePath, err := os.Executable()
@@ -89,11 +97,12 @@ func runTerraform(mergedInputs inputs.InputFields, mergedList lists.Selection) {
 	}
 
 	exeDir := filepath.Dir(exePath)
-	args = append(args, mergedList)
+	runTf := fmt.Sprintf("%s%s %s", exeDir, terraformExe, strings.Join(args, " "))
+
 	cmd := exec.Command(
 		"bash",
 		"-c",
-		fmt.Sprintf("%s/../../terraform/bin/tf_deploy.sh", exeDir),
+		runTf,
 	)
 
 	stdoutPipe, _ := cmd.StdoutPipe()
