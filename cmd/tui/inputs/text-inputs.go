@@ -58,11 +58,11 @@ func (m Model) setInputValues() Model {
 		}
 		switch input.Placeholder {
 		case accessText:
-			values["AccessKey"] = input.Value()
+			values["accessKey"] = input.Value()
 		case secretText:
-			values["SecretKey"] = input.Value()
+			values["secretKey"] = input.Value()
 		case domainText:
-			values["Domain"] = input.Value()
+			values["domain"] = input.Value()
 		}
 	}
 
@@ -93,17 +93,17 @@ func createTextInput(placeHolder string, inputs []textinput.Model) textinput.Mod
 func InitialModel(flags InputFields) Model {
 	var inputs []textinput.Model
 
-	if flags["AccessKey"] == "" {
+	if flags["accessKey"] == "" {
 		accessKeyInput := createTextInput(accessText, inputs)
 		inputs = append(inputs, accessKeyInput)
 	}
 
-	if flags["SecretKey"] == "" {
+	if flags["secretKey"] == "" {
 		secretKeyInput := createTextInput(secretText, inputs)
 		inputs = append(inputs, secretKeyInput)
 	}
 
-	if flags["Domain"] == "" {
+	if flags["domain"] == "" {
 		domainInput := createTextInput(domainText, inputs)
 		inputs = append(inputs, domainInput)
 	}

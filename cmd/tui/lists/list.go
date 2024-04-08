@@ -16,7 +16,7 @@ var (
 			Bold(true)
 )
 
-type Selection = string // alias for specificity
+type Selection map[string]string
 
 type item struct {
 	title, desc string
@@ -29,6 +29,7 @@ func (i item) FilterValue() string { return i.title }
 type Model struct {
 	List      list.Model
 	Selection Selection
+	Ami       string
 	Active    bool
 }
 
@@ -36,7 +37,7 @@ func (m Model) GetSelection() Selection {
 	return m.Selection
 }
 
-func IsValidChoice(regionInput Selection) bool {
+func IsValidChoice(regionInput string) bool {
 	for _, region := range Regions {
 		if item, ok := region.(item); ok {
 			if regionInput == item.title {
@@ -60,7 +61,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		if msg.String() == "enter" {
-			m.Selection = m.List.SelectedItem().(item).Title()
+			m.Selection = make(map[string]string)
+			m.Selection["region"] = m.List.SelectedItem().(item).Title()
+			m.Selection["ami"] = AmiMap[m.Selection["region"]]
 			return m, command.CustomQuit
 		}
 	case tea.WindowSizeMsg:

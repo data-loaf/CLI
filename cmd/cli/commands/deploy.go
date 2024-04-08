@@ -7,10 +7,10 @@ import (
 	lists "dataloaf/tui/lists"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"slices"
 	"strings"
 
 	list "github.com/charmbracelet/bubbles/list"
@@ -20,7 +20,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var terraformExe string = "/../../terraform/bin/tf_deploy.sh"
+var terraformRoot string = "/../../terraform"
 
 func mergeFlagsAndInputs(
 	inputFlags inputs.InputFields,
@@ -40,14 +40,15 @@ func mergeFlagsAndInputs(
 }
 
 func mergeFlagsAndListSelection(
-	region string,
-	selection string,
-) string {
-	if region != "" {
-		return region
-	} else {
+	listFlag string,
+	selection lists.Selection,
+) lists.Selection {
+	if len(listFlag) > 0 {
+		selection["ami"] = lists.AmiMap[listFlag]
 		return selection
 	}
+
+	return selection
 }
 
 func initInputsModel(flags inputs.InputFields) tea.Model {
@@ -77,32 +78,72 @@ func printOutput(pipe io.Reader) {
 	}
 }
 
-func runTerraform(mergedInputs inputs.InputFields, mergedList lists.Selection) {
-	var args []string
+func buildTfArgs(key string, val string) string {
+	var formattedKey string
+	switch key {
+	case "accessKey":
+		formattedKey = "access_key"
+	case "secretKey":
+		formattedKey = "secret_key"
+	case "domain":
+		formattedKey = "domain_name"
+	default:
+		formattedKey = key
+	}
+	return fmt.Sprintf("-var %s='%s'", formattedKey, strings.TrimSpace(val))
+}
 
-	for _, val := range mergedInputs {
-		args = append(args, strings.TrimSpace(val))
+func runTerraform(mergedInputs inputs.InputFields, mergedList lists.Selection) {
+	args := make([]string, 0)
+
+	for key, val := range mergedInputs {
+		args = append(args, buildTfArgs(key, val))
 	}
 
-	args = append(args, mergedList)
-
-	if slices.Contains(args, "") {
-		return
+	for key, val := range mergedList {
+		args = append(args, buildTfArgs(key, val))
 	}
 
 	exePath, err := os.Executable()
 	if err != nil {
-		fmt.Println("Error", err)
-		return
+		fmt.Println("Error: ", err)
 	}
 
 	exeDir := filepath.Dir(exePath)
-	runTf := fmt.Sprintf("%s%s %s", exeDir, terraformExe, strings.Join(args, " "))
+
+	if err := os.Chdir(exeDir + terraformRoot); err != nil {
+		fmt.Println("Error: ", err)
+	}
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		fmt.Println("Error", err)
+	}
+
+	filepath.Walk(cwd, func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			fmt.Println("Error:", err)
+		}
+
+		if !info.IsDir() {
+			ext := filepath.Ext(path)
+			if ext == ".tfvars" {
+				args = append(
+					args,
+					fmt.Sprintf("-var-file='%s'", path),
+				)
+			}
+		}
+
+		return nil
+	})
+
+	tfRun := fmt.Sprintf("terraform apply %s -auto-approve", strings.Join(args, " "))
 
 	cmd := exec.Command(
 		"bash",
 		"-c",
-		runTf,
+		tfRun,
 	)
 
 	stdoutPipe, _ := cmd.StdoutPipe()
@@ -128,12 +169,12 @@ func executeDeploy(cmd *cobra.Command, args []string) {
 	region, _ := cmd.Flags().GetString("region")
 
 	inputFlags := inputs.InputFields{
-		"AccessKey": accessKey,
-		"SecretKey": secretKey,
-		"Domain":    domain,
+		"accessKey": accessKey,
+		"secretKey": secretKey,
+		"domain":    domain,
 	}
 
-	var listFlag lists.Selection = region
+	var listFlag string = region
 
 	inputsModel := initInputsModel(inputFlags)
 	listModel := initListModel()
@@ -142,8 +183,8 @@ func executeDeploy(cmd *cobra.Command, args []string) {
 	viewsRequired := *new(app.ViewsRequired)
 	currentView := appModel.SessionView
 
-	if inputFlags["AccessKey"] == "" || inputFlags["SecretKey"] == "" ||
-		inputFlags["Domain"] == "" {
+	if inputFlags["accessKey"] == "" || inputFlags["secretKey"] == "" ||
+		inputFlags["somain"] == "" {
 		currentView = app.InputsView
 		viewsRequired.InputFields = true
 	}

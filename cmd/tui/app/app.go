@@ -29,7 +29,7 @@ type Model struct {
 
 type resultData struct {
 	InputFields   inputs.InputFields
-	ListSelection string
+	ListSelection lists.Selection
 }
 
 var result resultData
