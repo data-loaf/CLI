@@ -56,8 +56,10 @@ resource "aws_lb" "test" {
 
 resource "aws_lb_listener" "loaf_listener" {
   load_balancer_arn = aws_lb.test.arn
-  port              = "80"
-  protocol          = "HTTP"
+  port              = "443"
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = aws_acm_certificate.certificate.arn
 
   default_action {
     type             = "forward"
