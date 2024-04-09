@@ -1,17 +1,12 @@
 package commands
 
 import (
-	"bufio"
 	app "dataloaf/tui/app"
 	inputs "dataloaf/tui/inputs"
 	lists "dataloaf/tui/lists"
 	"fmt"
-	"io"
-	"io/fs"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"strings"
+
+	utils "dataloaf/utils"
 
 	list "github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/lipgloss"
@@ -19,8 +14,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
 )
-
-var terraformRoot string = "/../../terraform"
 
 func mergeFlagsAndInputs(
 	inputFlags inputs.InputFields,
@@ -71,97 +64,6 @@ func initListModel() tea.Model {
 	return regionModel
 }
 
-func printOutput(pipe io.Reader) {
-	scanner := bufio.NewScanner(pipe)
-	for scanner.Scan() {
-		fmt.Println(scanner.Text())
-	}
-}
-
-func buildTfArgs(key string, val string) string {
-	var formattedKey string
-	switch key {
-	case "accessKey":
-		formattedKey = "access_key"
-	case "secretKey":
-		formattedKey = "secret_key"
-	case "domain":
-		formattedKey = "domain_name"
-	default:
-		formattedKey = key
-	}
-	return fmt.Sprintf("-var %s='%s'", formattedKey, strings.TrimSpace(val))
-}
-
-func runTerraform(mergedInputs inputs.InputFields, mergedList lists.Selection) {
-	args := make([]string, 0)
-
-	for key, val := range mergedInputs {
-		args = append(args, buildTfArgs(key, val))
-	}
-
-	for key, val := range mergedList {
-		args = append(args, buildTfArgs(key, val))
-	}
-
-	exePath, err := os.Executable()
-	if err != nil {
-		fmt.Println("Error: ", err)
-	}
-
-	exeDir := filepath.Dir(exePath)
-
-	if err := os.Chdir(exeDir + terraformRoot); err != nil {
-		fmt.Println("Error: ", err)
-	}
-
-	cwd, err := os.Getwd()
-	if err != nil {
-		fmt.Println("Error", err)
-	}
-
-	filepath.Walk(cwd, func(path string, info fs.FileInfo, err error) error {
-		if err != nil {
-			fmt.Println("Error:", err)
-		}
-
-		if !info.IsDir() {
-			ext := filepath.Ext(path)
-			if ext == ".tfvars" {
-				args = append(
-					args,
-					fmt.Sprintf("-var-file='%s'", path),
-				)
-			}
-		}
-
-		return nil
-	})
-
-	tfRun := fmt.Sprintf("terraform apply %s -auto-approve", strings.Join(args, " "))
-
-	cmd := exec.Command(
-		"bash",
-		"-c",
-		tfRun,
-	)
-
-	stdoutPipe, _ := cmd.StdoutPipe()
-	stderrPipe, _ := cmd.StderrPipe()
-
-	if err := cmd.Start(); err != nil {
-		fmt.Println("Error:", err)
-	}
-
-	go printOutput(stdoutPipe)
-	go printOutput(stderrPipe)
-
-	if err := cmd.Wait(); err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
-}
-
 func executeDeploy(cmd *cobra.Command, args []string) {
 	accessKey, _ := cmd.Flags().GetString("access")
 	secretKey, _ := cmd.Flags().GetString("secret")
@@ -210,7 +112,7 @@ func executeDeploy(cmd *cobra.Command, args []string) {
 	resultData := app.GetData()
 	mergedInputs := mergeFlagsAndInputs(inputFlags, resultData.InputFields)
 	mergedList := mergeFlagsAndListSelection(listFlag, resultData.ListSelection)
-	runTerraform(mergedInputs, mergedList)
+	utils.RunTerraform(mergedInputs, mergedList)
 }
 
 // DeployCmd represents the deploy command
