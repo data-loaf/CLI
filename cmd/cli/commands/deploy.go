@@ -85,8 +85,8 @@ func executeDeploy(cmd *cobra.Command, args []string) {
 	viewsRequired := *new(app.ViewsRequired)
 	currentView := appModel.SessionView
 
-	if inputFlags["accessKey"] == "" || inputFlags["secretKey"] == "" ||
-		inputFlags["somain"] == "" {
+	if len(inputFlags["accessKey"]) == 0 || len(inputFlags["secretKey"]) == 0 ||
+		len(inputFlags["domain"]) == 0 {
 		currentView = app.InputsView
 		viewsRequired.InputFields = true
 	}

@@ -52,7 +52,7 @@ func (m Model) setInputValues() Model {
 	values := make(InputFields, 3)
 
 	for _, input := range m.inputs {
-		if input.Value() == "" {
+		if len(input.Value()) == 0 {
 			m.validationErr = true
 			return m
 		}
@@ -93,17 +93,17 @@ func createTextInput(placeHolder string, inputs []textinput.Model) textinput.Mod
 func InitialModel(flags InputFields) Model {
 	var inputs []textinput.Model
 
-	if flags["accessKey"] == "" {
+	if len(flags["accessKey"]) == 0 {
 		accessKeyInput := createTextInput(accessText, inputs)
 		inputs = append(inputs, accessKeyInput)
 	}
 
-	if flags["secretKey"] == "" {
+	if len(flags["secretKey"]) == 0 {
 		secretKeyInput := createTextInput(secretText, inputs)
 		inputs = append(inputs, secretKeyInput)
 	}
 
-	if flags["domain"] == "" {
+	if len(flags["domain"]) == 0 {
 		domainInput := createTextInput(domainText, inputs)
 		inputs = append(inputs, domainInput)
 	}
