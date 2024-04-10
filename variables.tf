@@ -1,18 +1,20 @@
 # AWS connection & authentication
 
-variable "aws_access_key" {
+variable "access_key" {
   type        = string
   description = "AWS access key"
   default     = ""
+  sensitive   = true
 }
 
-variable "aws_secret_key" {
+variable "secret_key" {
   type        = string
   description = "AWS secret key"
   default     = ""
+  sensitive   = true
 }
 
-variable "aws_region" {
+variable "region" {
   type        = string
   description = "AWS region"
 }
@@ -90,4 +92,18 @@ variable "redshift_password" {
   type        = string
   description = "Redshift Password"
   sensitive   = true
+}
+
+# Customer Fullstack Domain
+
+variable "domain_name" {
+  type        = string
+  description = "Domain name for the full stack application"
+}
+
+#  EC2 AMI
+
+variable "ami" {
+  type        = string
+  description = "AMI for EC2 Instance"
 }
