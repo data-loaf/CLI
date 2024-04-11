@@ -49,7 +49,7 @@ resource "aws_instance" "loaf_app" {
     sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
     sudo apt update
     sudo apt install -y docker-ce
-    git clone -b health_route https://github.com/Capstone2401/backend-app.git
+    git clone https://github.com/Capstone2401/backend-app.git
     sudo systemctl start docker
     cd backend-app
     echo "REDSHIFT_CONN_STRING=postgresql://${aws_redshift_cluster.redshift_cluster.master_username}:${aws_redshift_cluster.redshift_cluster.master_password}@${aws_redshift_cluster.redshift_cluster.endpoint}/${aws_redshift_cluster.redshift_cluster.database_name}" >> .env
