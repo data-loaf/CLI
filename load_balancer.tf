@@ -41,7 +41,7 @@ resource "aws_security_group" "loaf_sg_lb" {
 }
 
 resource "aws_lb" "loaf_load_balancer" {
-  name               = "loaf_load_balancer"
+  name               = "loaf-load-balancer"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.loaf_sg_lb.id]
