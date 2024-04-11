@@ -40,6 +40,7 @@ resource "aws_security_group" "loaf_sg_lb" {
   }
 }
 
+
 resource "aws_lb" "loaf_load_balancer" {
   name               = "loaf-load-balancer"
   internal           = false
