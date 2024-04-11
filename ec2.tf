@@ -33,9 +33,10 @@ resource "aws_security_group" "loaf_sg_ec2" {
 
 
 resource "aws_instance" "loaf_app" {
-  ami                    = "ami-0f8b8f874036055b1"
+  ami                    = var.ami
   instance_type          = "t2.micro"
   vpc_security_group_ids = [aws_security_group.loaf_sg_ec2.id]
+  subnet_id              = aws_default_subnet.default_az1.id
 
   user_data = <<-EOF
     #!/bin/bash
@@ -51,11 +52,10 @@ resource "aws_instance" "loaf_app" {
     git clone https://github.com/Capstone2401/backend-app.git
     sudo systemctl start docker
     cd backend-app
-    echo "REDSHIFT_CONN_STRING=postgresql://${aws_redshift_cluster.redshift_cluster.master_username}:${aws_redshift_cluster.redshift_cluster.master_password}@${aws_redshift_cluster.redshift_cluster.endpoint}/${aws_redshift_cluster.redshift_cluster.database_name}" > .env
+    echo "REDSHIFT_CONN_STRING=postgresql://${aws_redshift_cluster.redshift_cluster.master_username}:${aws_redshift_cluster.redshift_cluster.master_password}@${aws_redshift_cluster.redshift_cluster.endpoint}/${aws_redshift_cluster.redshift_cluster.database_name}" >> .env
     sudo docker build -t backend-app:loaf .
     sudo apt install docker-compose
     sudo docker compose --env-file .env up -d
-
   EOF
 
   tags = {
