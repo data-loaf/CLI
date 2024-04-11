@@ -40,8 +40,8 @@ resource "aws_security_group" "loaf_sg_lb" {
   }
 }
 
-resource "aws_lb" "test" {
-  name               = "test-lb-tf"
+resource "aws_lb" "loaf_load_balancer" {
+  name               = "loaf_load_balancer"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.loaf_sg_lb.id]
@@ -55,7 +55,7 @@ resource "aws_lb" "test" {
 }
 
 resource "aws_lb_listener" "loaf_listener" {
-  load_balancer_arn = aws_lb.test.arn
+  load_balancer_arn = aws_lb.loaf_load_balancer.arn
   port              = "443"
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-2016-08"
@@ -127,5 +127,5 @@ resource "aws_acm_certificate_validation" "certificate" {
 }
 
 output "load_balancer_dns" {
-  value = aws_lb.test.dns_name
+  value = aws_lb.loaf_load_balancer.dns_name
 }
