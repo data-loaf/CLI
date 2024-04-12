@@ -23,8 +23,8 @@ resource "aws_lambda_function" "update_user_lambda" {
   }
 }
 
-resource "aws_iam_policy" "lambda_managed_policy" {
-  name = "lambda-firehose-policy"
+resource "aws_iam_policy" "lambda_policy" {
+  name = "lambda-policy"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -51,7 +51,7 @@ resource "aws_iam_role" "lambda_iam_role" {
       Action = "sts:AssumeRole"
     }]
   })
-  managed_policy_arns = [aws_iam_policy.lambda_managed_policy.arn]
+  managed_policy_arns = [aws_iam_policy.lambda_policy.arn]
 }
 
 resource "aws_lambda_permission" "allow_api" {
