@@ -22,13 +22,13 @@ resource "aws_subnet" "dataloaf-redshift-subnet-az2" {
   availability_zone = data.aws_availability_zones.available.names[1]
 }
 
-resource "aws_redshift_subnet_group" "dataloaf-redshift-sub-group" {
+resource "aws_redshift_subnet_group" "dataloaf-redshift-subnet-group" {
   depends_on = [
     aws_subnet.dataloaf-redshift-subnet-az1,
     aws_subnet.dataloaf-redshift-subnet-az2,
   ]
 
-  name       = "dataloaf-redshift-sub-group"
+  name       = "dataloaf-redshift-subnet-group"
   subnet_ids = [aws_subnet.dataloaf-redshift-subnet-az1.id, aws_subnet.dataloaf-redshift-subnet-az2.id]
 }
 
@@ -111,7 +111,7 @@ resource "aws_redshift_cluster" "redshift_cluster" {
   master_password           = var.redshift_password
   node_type                 = "dc2.large"
   cluster_type              = "single-node"
-  cluster_subnet_group_name = aws_redshift_subnet_group.dataloaf-redshift-sub-group.name
+  cluster_subnet_group_name = aws_redshift_subnet_group.dataloaf-redshift-subnet-group.name
   vpc_security_group_ids    = ["${aws_default_security_group.redshift_security_group.id}"]
   publicly_accessible       = true
   iam_roles                 = [aws_iam_role.redshift_iam_role.arn]

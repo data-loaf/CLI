@@ -103,7 +103,7 @@ resource "aws_kinesis_firehose_delivery_stream" "firehose" {
       role_arn           = aws_iam_role.firehose_role.arn
       bucket_arn         = each.value.bucket_arn
       buffering_size     = 10
-      buffering_interval = 400
+      buffering_interval = 180
       compression_format = "GZIP"
     }
 
@@ -111,7 +111,7 @@ resource "aws_kinesis_firehose_delivery_stream" "firehose" {
       role_arn           = aws_iam_role.firehose_role.arn
       bucket_arn         = each.value.bucket_arn
       buffering_size     = 15
-      buffering_interval = 300
+      buffering_interval = 180
       compression_format = "GZIP"
     }
 
