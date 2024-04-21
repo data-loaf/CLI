@@ -109,6 +109,10 @@ func executeDeploy(cmd *cobra.Command, args []string) {
 		}
 	}
 
+	if app.IsAborted() {
+		return
+	}
+
 	resultData := app.GetData()
 	mergedInputs := mergeFlagsAndInputs(inputFlags, resultData.InputFields)
 	mergedList := mergeFlagsAndListSelection(listFlag, resultData.ListSelection)

@@ -14,7 +14,7 @@ import (
 var (
 	titleText           = "DataLoaf 🍞"
 	descText            = "To deploy, we need your AWS credentials"
-	errText             = "All fields are required to provision"
+	errText             = "Access and Secret Key are required to provision"
 	accessText          = "Access Key"
 	secretText          = "Secret Key"
 	domainText          = "Domain for dataloaf app"
@@ -52,7 +52,7 @@ func (m Model) setInputValues() Model {
 	values := make(InputFields, 3)
 
 	for _, input := range m.inputs {
-		if len(input.Value()) == 0 {
+		if len(input.Value()) == 0 && input.Placeholder != domainText {
 			m.validationErr = true
 			return m
 		}
@@ -123,7 +123,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "esc":
-			return m, tea.Quit
+			return m, command.Aborted
 
 		// Change cursor mode
 		case "ctrl+r":

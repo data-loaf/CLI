@@ -32,7 +32,14 @@ type resultData struct {
 	ListSelection lists.Selection
 }
 
-var result resultData
+var (
+	result  resultData
+	aborted bool
+)
+
+func IsAborted() bool {
+	return aborted == true
+}
 
 func GetData() resultData {
 	return result
@@ -70,6 +77,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case command.CustomQuitMsg:
 		m.setResultData()
+		return m, tea.Quit
+
+	case command.AbortedMsg:
+		aborted = true
 		return m, tea.Quit
 	}
 
