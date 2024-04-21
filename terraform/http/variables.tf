@@ -91,3 +91,17 @@ variable "redshift_password" {
   description = "Redshift Password"
   sensitive   = true
 }
+
+# Customer Fullstack Domain
+
+variable "domain_name" {
+  type        = string
+  description = "Domain name for the full stack application"
+}
+
+#  EC2 AMI
+
+variable "ami" {
+  type        = string
+  description = "AMI for EC2 Instance"
+}

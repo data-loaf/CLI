@@ -7,6 +7,10 @@ http/lib/node_modules
 https/lib/node_modules
 http/.terraform
 https/.terraform
+http/.tfstate
+http/.tfstate.backup
+https/.tfstate
+https/.tfstate.backup
 
 .DS_Store
 lib/.DS_Store

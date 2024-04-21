@@ -1,3 +1,25 @@
+resource "aws_default_vpc" "default" {
+  tags = {
+    Name = "Default"
+  }
+}
+
+resource "aws_default_subnet" "default_az1" {
+  availability_zone = data.aws_availability_zones.available.names[0]
+
+  tags = {
+    Name = "Default subnet 1"
+  }
+}
+
+resource "aws_default_subnet" "default_az2" {
+  availability_zone = data.aws_availability_zones.available.names[1]
+
+  tags = {
+    Name = "Default subnet 2"
+  }
+}
+
 resource "aws_security_group" "loaf_sg_ec2" {
   name        = "loaf_sg_ec2"
   description = "Security group for EC2"
@@ -65,4 +87,4 @@ resource "aws_instance" "loaf_app" {
 
 output "ec2_url" {
   value = aws_instance.loaf_app.public_dns
-} 
+}
