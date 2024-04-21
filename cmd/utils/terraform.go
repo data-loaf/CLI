@@ -89,6 +89,12 @@ func buildTfVarFiles(vars []string) []string {
 }
 
 func RunTerraform(mergedInputs inputs.InputFields, mergedList lists.Selection) {
+	if mergedInputs["domain"] == "" {
+		terraformRoot += "/http"
+	} else {
+		terraformRoot += "/https"
+	}
+
 	tfVars := buildTfVars(mergedInputs, mergedList)
 	tfVarFiles := buildTfVarFiles(tfVars)
 

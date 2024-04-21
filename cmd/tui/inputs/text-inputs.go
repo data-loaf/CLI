@@ -15,9 +15,9 @@ var (
 	titleText           = "DataLoaf 🍞"
 	descText            = "To deploy, we need your AWS credentials"
 	errText             = "Access and Secret Key are required to provision"
-	accessText          = "Access Key"
-	secretText          = "Secret Key"
-	domainText          = "Domain for dataloaf app"
+	accessText          = "Access Key (required)"
+	secretText          = "Secret Key (required)"
+	domainText          = "Domain for DataLoaf app (required for HTTPS only)"
 	docstyle            = lipgloss.NewStyle().Margin(1, 2)
 	focusedStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("#F1D492"))
 	blurredStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
