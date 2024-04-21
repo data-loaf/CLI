@@ -3,7 +3,10 @@
 *.tfstate.backup
 *.tfplan
 .terraform/
-lib/node_modules
+http/lib/node_modules
+https/lib/node_modules
+http/.terraform
+https/.terraform
 
 .DS_Store
 lib/.DS_Store
