@@ -100,6 +100,8 @@ func InitialModel(flags InputFields) Model {
 
 	if len(flags["secretKey"]) == 0 {
 		secretKeyInput := createTextInput(secretText, inputs)
+		secretKeyInput.EchoMode = textinput.EchoPassword
+		secretKeyInput.EchoCharacter = '*'
 		inputs = append(inputs, secretKeyInput)
 	}
 
