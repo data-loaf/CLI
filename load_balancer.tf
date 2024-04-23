@@ -47,8 +47,6 @@ resource "aws_lb" "loaf_load_balancer" {
   security_groups    = [aws_security_group.loaf_sg_lb.id]
   subnets            = [aws_default_subnet.default_az1.id, aws_default_subnet.default_az2.id]
 
-  enable_deletion_protection = true
-
   tags = {
     Environment = "production"
   }
