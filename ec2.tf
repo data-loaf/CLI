@@ -48,7 +48,7 @@ resource "aws_instance" "loaf_app" {
     sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
     sudo apt update
     sudo apt install -y docker-ce
-    git clone -b static_site https://github.com/Capstone2401/backend-app.git
+    git clone https://github.com/Capstone2401/backend-app.git
     git clone https://github.com/Capstone2401/frontend-app.git
     curl -sL https://deb.nodesource.com/setup_20.x -o /tmp/nodesource_setup.sh
     sudo bash /tmp/nodesource_setup.sh
