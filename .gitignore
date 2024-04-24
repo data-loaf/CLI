@@ -11,6 +11,7 @@ terraform/http/.tfstate
 terraform/http/.tfstate.backup
 terraform/https/.tfstate
 terraform/https/.tfstate.backup
+terraform/cmd/loaf
 
 .DS_Store
 lib/.DS_Store
