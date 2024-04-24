@@ -28,12 +28,16 @@ func mergeFlagsAndListSelection(
 	listFlag string,
 	selection lists.Selection,
 ) lists.Selection {
+	mergedList := make(map[string]string)
+
 	if len(listFlag) > 0 {
-		selection["ami"] = lists.AmiMap[listFlag]
-		return selection
+		mergedList["region"] = listFlag
+		mergedList["ami"] = lists.AmiMap[listFlag]
+		return mergedList
 	}
 
-	return selection
+	mergedList = selection
+	return mergedList
 }
 
 type flags struct {
