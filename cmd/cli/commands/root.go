@@ -23,6 +23,7 @@ func Execute() {
 
 func addCommands() {
 	RootCmd.AddCommand(DeployCmd)
+	RootCmd.AddCommand(RemoveCmd)
 }
 
 func init() {

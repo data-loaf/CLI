@@ -1,4 +1,4 @@
-package terraform
+package utils
 
 import (
 	"bufio"
@@ -88,7 +88,11 @@ func buildTfVarFiles(vars []string) []string {
 	return vars
 }
 
-func RunTerraform(mergedInputs inputs.InputFields, mergedList lists.Selection) {
+func RunTerraform(
+	loafCmd string,
+	mergedInputs inputs.InputFields,
+	mergedList lists.Selection,
+) error {
 	if mergedInputs["domain"] == "" {
 		terraformRoot += "/http"
 	} else {
@@ -106,10 +110,19 @@ func RunTerraform(mergedInputs inputs.InputFields, mergedList lists.Selection) {
 
 	if err := tfInit.Run(); err != nil {
 		fmt.Println("Error: ", err)
+		return err
+	}
+
+	loafToTf := map[string]string{"deploy": "apply", "remove": "destroy"}
+	tfCmd, ok := loafToTf[loafCmd]
+
+	if !ok {
+		fmt.Println("Function called with invalid command")
 	}
 
 	tfApplyCmd := fmt.Sprintf(
-		"terraform apply %s %s -auto-approve",
+		"terraform %s %s %s -auto-approve",
+		tfCmd,
 		strings.Join(tfVars, " "),
 		strings.Join(tfVarFiles, " "),
 	)
@@ -125,6 +138,7 @@ func RunTerraform(mergedInputs inputs.InputFields, mergedList lists.Selection) {
 
 	if err := tfAppy.Start(); err != nil {
 		fmt.Println("Error:", err)
+		return err
 	}
 
 	go printOutput(stdoutPipe)
@@ -132,6 +146,8 @@ func RunTerraform(mergedInputs inputs.InputFields, mergedList lists.Selection) {
 
 	if err := tfAppy.Wait(); err != nil {
 		fmt.Println("Error:", err)
-		return
+		return err
 	}
+
+	return nil
 }

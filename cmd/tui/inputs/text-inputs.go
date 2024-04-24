@@ -13,7 +13,7 @@ import (
 
 var (
 	titleText           = "DataLoaf 🍞"
-	descText            = "To deploy, we need your AWS credentials"
+	descText            = "To continue, we need your AWS credentials"
 	errText             = "Access and Secret Key are required to provision"
 	accessText          = "Access Key (required)"
 	secretText          = "Secret Key (required)"
