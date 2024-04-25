@@ -1,18 +1,20 @@
 # AWS connection & authentication
 
-variable "aws_access_key" {
+variable "access_key" {
   type        = string
   description = "AWS access key"
   default     = ""
+  sensitive   = true
 }
 
-variable "aws_secret_key" {
+variable "secret_key" {
   type        = string
   description = "AWS secret key"
   default     = ""
+  sensitive   = true
 }
 
-variable "aws_region" {
+variable "region" {
   type        = string
   description = "AWS region"
 }
