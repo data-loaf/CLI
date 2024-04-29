@@ -50,8 +50,6 @@ resource "aws_kinesis_firehose_delivery_stream" "firehose" {
   }
 }
 
-data "aws_region" "current" {}
-
 data "aws_iam_policy_document" "firehose_assume_role_policy" {
   statement {
     effect = "Allow"
