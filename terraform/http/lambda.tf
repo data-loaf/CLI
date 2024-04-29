@@ -1,12 +1,3 @@
-# Data Generation Lambda Function
-resource "aws_lambda_function" "stream_router_lambda" {
-  filename      = "./lib/stream_router_lambda.zip"
-  function_name = "stream_router"
-  role          = aws_iam_role.lambda_iam_role.arn
-  handler       = "index.handler"
-  runtime       = "nodejs20.x"
-}
-
 # Data Update Lambda Function
 resource "aws_lambda_function" "update_user_lambda" {
 
@@ -52,22 +43,6 @@ resource "aws_iam_role" "lambda_iam_role" {
     }]
   })
   managed_policy_arns = [aws_iam_policy.lambda_policy.arn]
-}
-
-resource "aws_lambda_permission" "allow_api" {
-  statement_id_prefix = "ExecuteByAPI"
-  action              = "lambda:InvokeFunction"
-  function_name       = aws_lambda_function.stream_router_lambda.function_name
-  principal           = "apigateway.amazonaws.com"
-  source_arn          = "${aws_apigatewayv2_api.api_gateway.execution_arn}/*/POST/events"
-}
-
-resource "aws_lambda_permission" "allow_api_users" {
-  statement_id_prefix = "ExecuteByAPIUsers"
-  action              = "lambda:InvokeFunction"
-  function_name       = aws_lambda_function.stream_router_lambda.function_name
-  principal           = "apigateway.amazonaws.com"
-  source_arn          = "${aws_apigatewayv2_api.api_gateway.execution_arn}/*/POST/users"
 }
 
 resource "aws_lambda_permission" "allow_api_update_users" {
