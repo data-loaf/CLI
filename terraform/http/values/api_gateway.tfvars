@@ -7,7 +7,7 @@ api_gateway_protocol = "HTTP"
 // API Gateway Route
 api_gateway_events_route_key       = "POST /events"
 api_gateway_users_route_key        = "POST /users"
-api_gateway_users_update_route_key = "POST /update"
+api_gateway_users_update_route_key = "PATCH /update"
 
 // API Gateway Integration
 api_gateway_integration_type        = "AWS_PROXY"

@@ -6,6 +6,7 @@ resource "aws_lambda_function" "update_user_lambda" {
   role          = aws_iam_role.lambda_iam_role.arn
   handler       = "index.handler"
   runtime       = "nodejs20.x"
+  timeout = 60
 
   environment {
     variables = {
@@ -50,5 +51,5 @@ resource "aws_lambda_permission" "allow_api_update_users" {
   action              = "lambda:InvokeFunction"
   function_name       = aws_lambda_function.update_user_lambda.function_name
   principal           = "apigateway.amazonaws.com"
-  source_arn          = "${aws_apigatewayv2_api.api_gateway.execution_arn}/*/POST/update"
+  source_arn          = "${aws_apigatewayv2_api.api_gateway.execution_arn}/*/PATCH/update"
 }
