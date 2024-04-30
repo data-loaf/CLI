@@ -3,10 +3,18 @@ locals {
     events = {
       name             = "loaf-event-kinesis-stream"
       retention_period = 24
+      tags = {
+        environment: "prod"
+        stream_type: "events"
+      }
     },
     users = {
       name             = "loaf-user-kinesis-stream"
       retention_period = 24
+      tags = {
+        environment: "prod"
+        stream_type: "users"
+      }
     }
   }
 }
@@ -25,7 +33,5 @@ resource "aws_kinesis_stream" "loaf_stream" {
     stream_mode = "ON_DEMAND"
   }
 
-  tags = {
-    Environment = "prod"
-  }
+  tags = each.value.tags
 }

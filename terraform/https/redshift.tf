@@ -121,6 +121,9 @@ resource "aws_redshift_cluster" "redshift_cluster" {
 resource "aws_secretsmanager_secret" "redshift_connection" {
   description = "Redshift connect details"
   name        = "redshift_secret_loaf_${random_string.unique_suffix.result}"
+  tags = {
+    "RedshiftSecret": "",
+  }
 }
 
 resource "aws_secretsmanager_secret_version" "redshift_connection" {
