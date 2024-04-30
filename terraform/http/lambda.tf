@@ -54,5 +54,5 @@ resource "aws_lambda_permission" "apigw_invoke_lambda" {
   function_name = aws_lambda_function.update_user_lambda.arn
   principal     = "apigateway.amazonaws.com"
 
-  source_arn          = "${aws_api_gateway_rest_api.api_gateway.execution_arn}/*/PATCH/update"
+  source_arn          = "${aws_api_gateway_rest_api.api_gateway.execution_arn}/*/PATCH/users"
 }
