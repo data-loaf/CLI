@@ -53,6 +53,8 @@ resource "aws_api_gateway_integration" "events_kinesis_integration" {
   uri                     = "arn:aws:apigateway:${var.region}:kinesis:action/PutRecord"
   credentials             = aws_iam_role.api_gateway_role.arn
 
+  depends_on = [aws_api_gateway_rest_api.api_gateway, aws_api_gateway_method.post_events]
+
 }
 
 resource "aws_api_gateway_integration" "users_kinesis_integration" {
@@ -64,6 +66,7 @@ resource "aws_api_gateway_integration" "users_kinesis_integration" {
   uri                     = "arn:aws:apigateway:${var.region}:kinesis:action/PutRecord"
   credentials             = aws_iam_role.api_gateway_role.arn
 
+  depends_on = [aws_api_gateway_rest_api.api_gateway, aws_api_gateway_method.post_users]
 }
 
 resource "aws_api_gateway_integration" "update_user_lambda_integration" {
@@ -73,6 +76,8 @@ resource "aws_api_gateway_integration" "update_user_lambda_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.update_user_lambda.invoke_arn
+
+  depends_on = [aws_api_gateway_rest_api.api_gateway, aws_api_gateway_method.patch_users]
 }
 
 # Integration responses for events Kinesis integration
@@ -82,6 +87,7 @@ resource "aws_api_gateway_integration_response" "events_kinesis_integration_resp
   http_method = aws_api_gateway_method.post_events.http_method
   status_code = "200"
 
+  depends_on = [aws_api_gateway_integration.events_kinesis_integration]
   response_templates = {
     "application/json" = ""
   }
@@ -93,6 +99,8 @@ resource "aws_api_gateway_method_response" "events_method_response_200" {
   resource_id = aws_api_gateway_resource.events.id
   http_method = aws_api_gateway_method.post_events.http_method
   status_code = "200"
+
+  depends_on = [aws_api_gateway_rest_api.api_gateway, aws_api_gateway_method.post_events]
 }
 
 # Integration responses for users Kinesis integration
@@ -102,6 +110,7 @@ resource "aws_api_gateway_integration_response" "users_kinesis_integration_respo
   http_method = aws_api_gateway_method.post_users.http_method
   status_code = "200"
 
+  depends_on = [aws_api_gateway_integration.users_kinesis_integration]
   response_templates = {
     "application/json" = ""
   }
@@ -113,6 +122,8 @@ resource "aws_api_gateway_method_response" "users_method_response_200" {
   resource_id = aws_api_gateway_resource.users.id
   http_method = aws_api_gateway_method.post_users.http_method
   status_code = "200"
+
+  depends_on = [aws_api_gateway_integration.users_kinesis_integration]
 }
 
 resource "aws_api_gateway_method_response" "users_update_method_response_200" {
@@ -120,10 +131,24 @@ resource "aws_api_gateway_method_response" "users_update_method_response_200" {
   resource_id = aws_api_gateway_resource.update_users.id
   http_method = aws_api_gateway_method.patch_users.http_method
   status_code = "200"
+
+  depends_on = [
+    aws_api_gateway_rest_api.api_gateway,
+    aws_api_gateway_method.patch_users,
+    aws_api_gateway_integration.update_user_lambda_integration
+  ]
 }
 
 resource "aws_api_gateway_deployment" "api_gateway_deployment" {
-  depends_on      = [aws_api_gateway_rest_api.api_gateway, aws_api_gateway_method.post_events, aws_api_gateway_method.post_users, aws_api_gateway_method.patch_users]
+  depends_on      = [
+    aws_api_gateway_rest_api.api_gateway,
+    aws_api_gateway_method.post_events,
+    aws_api_gateway_method.post_users,
+    aws_api_gateway_method.patch_users,
+    aws_api_gateway_integration.events_kinesis_integration,
+    aws_api_gateway_integration.users_kinesis_integration,
+    aws_api_gateway_integration.update_user_lambda_integration,
+  ]
   rest_api_id     = aws_api_gateway_rest_api.api_gateway.id
 }
 
@@ -132,8 +157,6 @@ resource "aws_api_gateway_stage" "bake_stage" {
   deployment_id = aws_api_gateway_deployment.api_gateway_deployment.id
   stage_name = "bake-stage"
 }
-
-
 
 resource "aws_iam_policy_attachment" "api_gateway_attachment" {
   name       = "api_gateway_attachment"
@@ -173,3 +196,5 @@ resource "aws_iam_role" "api_gateway_role" {
   })
 
 }
+
+
