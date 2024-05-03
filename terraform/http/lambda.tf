@@ -13,22 +13,6 @@ resource "aws_lambda_function" "update_user_lambda" {
   }
 }
 
-# IAM Policy for Lambda
-resource "aws_iam_policy" "lambda_policy" {
-  name = "lambda-policy"
-
-  policy = jsonencode({
-    Version   = "2012-10-17"
-    Statement = [
-      {
-        Action   = ["firehose:*"]
-        Effect   = "Allow"
-        Resource = "*"
-      },
-    ]
-  })
-}
-
 # IAM Role for Lambda
 resource "aws_iam_role" "lambda_iam_role" {
   name               = "lambda_iam_role"
@@ -44,8 +28,6 @@ resource "aws_iam_role" "lambda_iam_role" {
       }
     ]
   })
-
-  managed_policy_arns = [aws_iam_policy.lambda_policy.arn]
 }
 
 resource "aws_lambda_permission" "apigw_invoke_lambda" {
@@ -53,6 +35,5 @@ resource "aws_lambda_permission" "apigw_invoke_lambda" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.update_user_lambda.arn
   principal     = "apigateway.amazonaws.com"
-
-  source_arn          = "${aws_api_gateway_rest_api.api_gateway.execution_arn}/*/PATCH/users"
+  source_arn          = "${aws_api_gateway_rest_api.api_gateway.execution_arn}/*/POST/update_users"
 }
