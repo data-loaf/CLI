@@ -6,6 +6,7 @@ resource "aws_default_vpc" "default" {
 
 resource "aws_default_subnet" "default_az1" {
   availability_zone = data.aws_availability_zones.available.names[0]
+  depends_on = [aws_default_vpc.default]
 
   tags = {
     Name = "Default subnet 1"
@@ -14,6 +15,7 @@ resource "aws_default_subnet" "default_az1" {
 
 resource "aws_default_subnet" "default_az2" {
   availability_zone = data.aws_availability_zones.available.names[1]
+  depends_on = [aws_default_vpc.default]
 
   tags = {
     Name = "Default subnet 2"
@@ -24,6 +26,7 @@ resource "aws_security_group" "loaf_sg_lb" {
   name        = "loaf_sg_lb"
   description = "Security group for Load Balancer"
   vpc_id      = aws_default_vpc.default.id
+  depends_on = [aws_default_vpc.default]
 
   ingress {
     from_port   = 0
