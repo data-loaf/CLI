@@ -3,9 +3,6 @@
 *.tfstate.backup
 *.tfplan
 .terraform/
-<<<<<<< HEAD
-terraform/lib/node_modules
-=======
 terraform/http/lib/node_modules
 terraform/https/lib/node_modules
 terraform/http/.terraform
@@ -15,7 +12,6 @@ terraform/http/.tfstate.backup
 terraform/https/.tfstate
 terraform/https/.tfstate.backup
 cmd/cli/loaf
->>>>>>> origin/main
 
 .DS_Store
 lib/.DS_Store
